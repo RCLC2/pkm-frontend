@@ -1,0 +1,215 @@
+"use client";
+
+import { useState } from "react";
+import { ThemeProvider } from "styled-components";
+import { theme } from "../../../styled/thema";
+import { ProjectCreation } from "../projectCreation/ProjectCreation";
+import { Sidebar } from "../../../component/project/Sidebar";
+import { NoteEditor } from "../../../component/project/NoteEditor";
+import { GraphView } from "../../../component/project/GraphView";
+import { SearchBar } from "../../../component/project/SearchBar";
+import * as S from "./DashboardStyled";
+import {
+  Network,
+  FileText,
+  Plus,
+  BookOpen,
+  Briefcase,
+  ArrowLeft,
+} from "lucide-react";
+
+export default function ZettelkastenApp() {
+  const [hasProject, setHasProject] = useState(false);
+  const [currentProject, setCurrentProject] = useState(null);
+  const [activeNote, setActiveNote] = useState("welcome-note");
+  const [activeView, setActiveView] = useState("editor");
+  const [methodology, setMethodology] = useState("zettelkasten");
+
+  const saveProject = (project) => {
+    const savedProjects = JSON.parse(
+      localStorage.getItem("knowledgebase-projects") || "[]"
+    );
+    const newProject = {
+      id: project.id,
+      name: project.name,
+      methodology: project.template.methodology,
+      templateId: project.template.id,
+      createdAt: new Date().toISOString(),
+      lastModified: new Date().toISOString(),
+      noteCount: 1,
+    };
+
+    const existingIndex = savedProjects.findIndex((p) => p.id === project.id);
+    if (existingIndex >= 0) {
+      savedProjects[existingIndex] = {
+        ...savedProjects[existingIndex],
+        lastModified: new Date().toISOString(),
+      };
+    } else {
+      savedProjects.unshift(newProject);
+    }
+
+    localStorage.setItem(
+      "knowledgebase-projects",
+      JSON.stringify(savedProjects)
+    );
+  };
+
+  const handleCreateProject = (template, projectName) => {
+    const projectId = `project-${Date.now()}`;
+    const project = { template, name: projectName, id: projectId };
+
+    setCurrentProject(project);
+    setMethodology(template.methodology);
+    setHasProject(true);
+
+    saveProject(project);
+  };
+
+  const handleOpenProject = (savedProject) => {
+    const template = {
+      id: savedProject.templateId,
+      name: savedProject.templateId.includes("zettelkasten")
+        ? "Zettelkasten"
+        : "CODE/PARA",
+      description: "",
+      methodology: savedProject.methodology,
+      icon:
+        savedProject.methodology === "zettelkasten" ? (
+          <BookOpen size={32} />
+        ) : (
+          <Briefcase size={32} />
+        ),
+      features: [],
+      preview: "",
+    };
+
+    setCurrentProject({
+      template,
+      name: savedProject.name,
+      id: savedProject.id,
+    });
+    setMethodology(savedProject.methodology);
+    setHasProject(true);
+
+    const savedProjects = JSON.parse(
+      localStorage.getItem("knowledgebase-projects") || "[]"
+    );
+    const updatedProjects = savedProjects.map((p) =>
+      p.id === savedProject.id
+        ? { ...p, lastModified: new Date().toISOString() }
+        : p
+    );
+    localStorage.setItem(
+      "knowledgebase-projects",
+      JSON.stringify(updatedProjects)
+    );
+  };
+
+  const handleBackToProjects = () => {
+    setHasProject(false);
+    setCurrentProject(null);
+    setActiveNote("welcome-note");
+    setActiveView("editor");
+  };
+
+  if (!hasProject) {
+    return (
+      <ThemeProvider theme={theme}>
+        <ProjectCreation
+          onCreateProject={handleCreateProject}
+          onOpenProject={handleOpenProject}
+        />
+      </ThemeProvider>
+    );
+  }
+
+  return (
+    <ThemeProvider theme={theme}>
+      <S.AppContainer>
+        <S.SidebarContainer>
+          <S.SidebarHeader>
+            <S.SidebarHeaderTop>
+              <S.SidebarTitleSection>
+                <S.BackButton
+                  onClick={handleBackToProjects}
+                  title="Back to Projects"
+                >
+                  <ArrowLeft size={16} />
+                </S.BackButton>
+                <S.SidebarTitle>
+                  {currentProject?.name || "Knowledge Base"}
+                </S.SidebarTitle>
+              </S.SidebarTitleSection>
+              <S.AddButton>
+                <Plus size={16} />
+              </S.AddButton>
+            </S.SidebarHeaderTop>
+
+            <S.MethodologySelector>
+              <S.Select
+                value={methodology}
+                onChange={(e) => setMethodology(e.target.value)}
+              >
+                <option value="zettelkasten">📚 Zettelkasten</option>
+                <option value="code-para">💼 CODE/PARA</option>
+              </S.Select>
+            </S.MethodologySelector>
+
+            <SearchBar />
+          </S.SidebarHeader>
+          <Sidebar
+            activeNote={activeNote}
+            onNoteSelect={setActiveNote}
+            methodology={methodology}
+          />
+        </S.SidebarContainer>
+
+        <S.MainContent>
+          <S.MainHeader>
+            <S.HeaderContent>
+              <S.TabsContainer>
+                <S.TabButton
+                  active={activeView === "editor"}
+                  onClick={() => setActiveView("editor")}
+                >
+                  <FileText size={16} />
+                  Editor
+                </S.TabButton>
+                <S.TabButton
+                  active={activeView === "graph"}
+                  onClick={() => setActiveView("graph")}
+                >
+                  <Network size={16} />
+                  Graph
+                </S.TabButton>
+              </S.TabsContainer>
+
+              <S.MethodologyIndicator>
+                {methodology === "zettelkasten" ? (
+                  <>
+                    <BookOpen size={16} />
+                    Zettelkasten Mode
+                  </>
+                ) : (
+                  <>
+                    <Briefcase size={16} />
+                    CODE/PARA Mode
+                  </>
+                )}
+              </S.MethodologyIndicator>
+            </S.HeaderContent>
+          </S.MainHeader>
+
+          <S.ContentArea>
+            {activeView === "editor" ? (
+              <NoteEditor noteId={activeNote} />
+            ) : (
+              <GraphView />
+            )}
+          </S.ContentArea>
+        </S.MainContent>
+      </S.AppContainer>
+    </ThemeProvider>
+  );
+}

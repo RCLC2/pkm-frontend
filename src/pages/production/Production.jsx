@@ -3,22 +3,21 @@ import ParticleImage from "react-particle-image";
 import * as S from "./ProductionStyled";
 import { useEffect, useRef } from "react";
 import Topbar from "../../component/productiontopbar/ProductionTopbar";
+import { useNavigate } from "react-router-dom";
 
 const particleOptions = {
   filter: ({ x, y, image }) => {
     // Get pixel
     const pixel = image.get(x, y);
-    
+
     return pixel.b < 50;
   },
   // eslint-disable-next-line no-unused-vars
   color: ({ x, y, image }) => "rgba(255,255,255,0.3)",
-  
 };
 
-export default function Production({handleScroll, isScrolled}) {
+export default function Production({ handleScroll, isScrolled }) {
   const wrapperRef = useRef(null);
-
 
   useEffect(() => {
     const wrapper = wrapperRef.current;
@@ -33,9 +32,11 @@ export default function Production({handleScroll, isScrolled}) {
     return () => wrapper.removeEventListener("scroll", onScroll);
   }, [handleScroll]);
 
+  const navigate = useNavigate();
+
   return (
     <S.Container ref={wrapperRef}>
-      <Topbar isScrolled={isScrolled}/>
+      <Topbar isScrolled={isScrolled} />
       <S.Content>
         <S.Section>
           <S.ImageContainer>
@@ -51,14 +52,12 @@ export default function Production({handleScroll, isScrolled}) {
           <S.TitleWrapper>
             <S.Title>Project Name</S.Title>
             <S.Subtitle>모든 생각을 기록하고, 연결하고, 확장하세요</S.Subtitle>
-            <S.Badge>
-            <span>Let's Start</span>
-          </S.Badge>
+            <S.Badge onClick={() => navigate("/projects")}>
+              <span>Let's Start</span>
+            </S.Badge>
           </S.TitleWrapper>
         </S.Section>
-        <S.Footer>
-        
-        </S.Footer>
+        <S.Footer></S.Footer>
 
         {/* 스크롤 테스트를 위한 긴 콘텐츠 */}
         <div style={{ height: "200vh", padding: "2rem" }}>
