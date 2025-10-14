@@ -152,7 +152,7 @@ export default function ZettelkastenApp() {
                 onChange={(e) => setMethodology(e.target.value)}
               >
                 <option value="zettelkasten">📚 Zettelkasten</option>
-                <option value="code-para">💼 CODE/PARA</option>
+                <option value="code-para">💼CODE/PARA</option>
               </S.Select>
             </S.MethodologySelector>
 

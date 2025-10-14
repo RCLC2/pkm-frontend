@@ -89,8 +89,8 @@ export function ProjectLayout() {
                 value={methodology}
                 onChange={(e) => setMethodology(e.target.value)}
               >
-                <option value="zettelkasten">📚 Zettelkasten</option>
-                <option value="code-para">💼 CODE/PARA</option>
+                <option value="zettelkasten">Zettelkasten</option>
+                <option value="code-para">CODE/PARA</option>
               </S.Select>
             </S.MethodologySelector>
 

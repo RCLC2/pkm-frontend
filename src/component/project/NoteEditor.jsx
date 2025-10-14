@@ -1,16 +1,11 @@
 "use client";
-
+import { useYorkieEditor } from "../yorkie/YorkieProvider";
 import { useState, useEffect } from "react";
 import { ThemeProvider } from "styled-components";
 import { theme } from "../../styled/thema";
 import * as S from "./NoteEditorStyled";
 import TiptapEditor from "./editor/TiptapEditor";
-import {
-  Save,
-  Tag,
-  Calendar,
-  FileText,
-} from "lucide-react";
+import { Save, Tag, Calendar, FileText } from "lucide-react";
 
 const mockNoteContent = {
   "welcome-note": {
@@ -83,6 +78,7 @@ Connected to: [[Atomic Notes Concept]], [[Linking Ideas Together]]`,
 };
 
 export function NoteEditor({ noteId }) {
+  const { doc } = useYorkieEditor(noteId);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [tags, setTags] = useState([]);
@@ -171,7 +167,7 @@ export function NoteEditor({ noteId }) {
           <TiptapEditor
             content={content}
             onChange={setContent}
-            placeholder="Start writing your note... Use [[double brackets]] to link to other notes."
+            yorkieDoc={doc}
           />
 
           <S.Metadata>

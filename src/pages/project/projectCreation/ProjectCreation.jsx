@@ -4,82 +4,11 @@ import { useState, useEffect } from "react";
 import { ThemeProvider } from "styled-components";
 import { theme } from "../../../styled/thema";
 import * as S from "./ProjectCreationStyled";
-import {
-  BookOpen,
-  Briefcase,
-  Search,
-  ArrowRight,
-  Sparkles,
-  Network,
-  FolderTree,
-  Clock,
-  Trash2,
-  FolderOpen,
-} from "lucide-react";
-
-
-const templates = [
-  {
-    id: "zettelkasten-research",
-    name: "Zettelkasten Research",
-    methodology: "zettelkasten",
-    description:
-      "Perfect for academic research, literature reviews, and building interconnected knowledge networks.",
-    icon: <BookOpen size={32} />,
-    features: [
-      "Atomic Notes",
-      "Bi-directional Links",
-      "Graph Visualization",
-      "Tag System",
-    ],
-    preview: "/img/preview/zettelkasten-research-notes-graph.jpg",
-  },
-  {
-    id: "zettelkasten-creative",
-    name: "Creative Writing",
-    methodology: "zettelkasten",
-    description:
-      "Ideal for writers, bloggers, and creative professionals building idea networks.",
-    icon: <Sparkles size={32} />,
-    features: [
-      "Idea Connections",
-      "Writing Prompts",
-      "Character Development",
-      "Plot Threads",
-    ],
-    preview: "/img/preview/creative-writing-notes-ideas.jpg",
-  },
-  {
-    id: "code-para-productivity",
-    name: "Personal Productivity",
-    methodology: "code-para",
-    description:
-      "Organize your life with the proven CODE/PARA system for maximum productivity.",
-    icon: <Briefcase size={32} />,
-    features: [
-      "Project Management",
-      "Area Organization",
-      "Resource Library",
-      "Archive System",
-    ],
-    preview: "/img/preview/productivity-dashboard-tasks-projects.jpg",
-  },
-  {
-    id: "code-para-business",
-    name: "Business Management",
-    methodology: "code-para",
-    description:
-      "Manage business operations, client projects, and strategic planning effectively.",
-    icon: <FolderTree size={32} />,
-    features: [
-      "Client Projects",
-      "Strategic Planning",
-      "Resource Management",
-      "Team Collaboration",
-    ],
-    preview: "/img/preview/business-management-dashboard-projects.jpg",
-  },
-];
+import { Search, ArrowRight, Network, Clock, FolderOpen, Trophy } from "lucide-react";
+import { templates, bookColors } from "./constants/templates.jsx";
+import { useBookshelfCustomization } from "./hooks/useBookshelfCustomization";
+import { BookshelfSection } from "./components/bookshelf/BookshelfSection";
+import { CustomizationPanel } from "./components/customization/CustomizationPanel";
 
 export function ProjectCreation({ onCreateProject, onOpenProject }) {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
@@ -87,6 +16,14 @@ export function ProjectCreation({ onCreateProject, onOpenProject }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [savedProjects, setSavedProjects] = useState([]);
   const [activeTab, setActiveTab] = useState("recent");
+  const {
+    points,
+    bookshelfTheme,
+    unlockedCustomizations,
+    bookshelfOptions,
+    handleApplyCustomization,
+    getPreviewStyle,
+  } = useBookshelfCustomization();
 
   useEffect(() => {
     const saved = localStorage.getItem("knowledgebase-projects");
@@ -122,6 +59,12 @@ export function ProjectCreation({ onCreateProject, onOpenProject }) {
       template.methodology.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+
+  const getBookThickness = (noteCount) => {
+    if (!noteCount || noteCount <= 0) return 28;
+    return Math.min(80, 24 + noteCount * 4);
+  };
+
   const handleCreateProject = () => {
     if (selectedTemplate && projectName.trim()) {
       onCreateProject(selectedTemplate, projectName.trim());
@@ -140,6 +83,10 @@ export function ProjectCreation({ onCreateProject, onOpenProject }) {
               <S.LogoText>Knowledge Base</S.LogoText>
             </S.Logo>
             <S.HeaderNav>
+              <S.PointsBadge>
+                <Trophy size={14} />
+                {points} pts
+              </S.PointsBadge>
               <span>Help</span>
               <span>Feedback</span>
             </S.HeaderNav>
@@ -192,71 +139,29 @@ export function ProjectCreation({ onCreateProject, onOpenProject }) {
                   </S.EmptyStateContent>
                 </S.EmptyState>
               ) : (
-                <S.Grid>
-                  {savedProjects.map((project) => {
-                    const template = templates.find(
-                      (t) => t.id === project.templateId
-                    );
-                    return (
-                      <S.Card
-                        key={project.id}
-                        onClick={() => onOpenProject(project)}
-                      >
-                        <S.CardHeader>
-                          <S.CardHeaderContent>
-                            <S.CardIconSection>
-                              <S.CardIcon>
-                                {template?.icon || <BookOpen size={24} />}
-                              </S.CardIcon>
-                              <S.CardTitleSection>
-                                <S.CardTitle>{project.name}</S.CardTitle>
-                                <S.Badge>
-                                  {project.methodology === "zettelkasten"
-                                    ? "Zettelkasten"
-                                    : "CODE/PARA"}
-                                </S.Badge>
-                              </S.CardTitleSection>
-                            </S.CardIconSection>
-                            <S.DeleteButton
-                              variant="ghost"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteProject(project.id);
-                              }}
-                            >
-                              <Trash2 size={16} />
-                            </S.DeleteButton>
-                          </S.CardHeaderContent>
-                        </S.CardHeader>
-                        <S.CardContent>
-                          <div style={{ marginBottom: theme.spacing[3] }}>
-                            <div
-                              style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                fontSize: theme.fontSizes.sm,
-                                color: theme.colors.mutedForeground,
-                              }}
-                            >
-                              <span>{project.noteCount} notes</span>
-                              <span>{formatDate(project.lastModified)}</span>
-                            </div>
-                          </div>
-                          <div
-                            style={{
-                              fontSize: theme.fontSizes.xs,
-                              color: theme.colors.mutedForeground,
-                            }}
-                          >
-                            Created {formatDate(project.createdAt)}
-                          </div>
-                        </S.CardContent>
-                      </S.Card>
-                    );
-                  })}
-                </S.Grid>
+                <>
+                  <BookshelfSection
+                    projects={savedProjects}
+                    templates={templates}
+                    bookshelfTheme={bookshelfTheme}
+                    getPreviewStyle={getPreviewStyle}
+                    getBookThickness={getBookThickness}
+                    bookColors={bookColors}
+                    formatDate={formatDate}
+                    onOpenProject={onOpenProject}
+                    onDeleteProject={handleDeleteProject}
+                  />
+
+                  <CustomizationPanel
+                    points={points}
+                    bookshelfOptions={bookshelfOptions}
+                    bookshelfTheme={bookshelfTheme}
+                    unlockedCustomizations={unlockedCustomizations}
+                    onApplyCustomization={handleApplyCustomization}
+                  />
+                </>
               )}
-            </S.TabContent>
+          </S.TabContent>
 
             <S.TabContent active={activeTab === "new"}>
               <S.SearchContainer>

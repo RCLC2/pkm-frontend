@@ -59,6 +59,19 @@ export const HeaderNav = styled.div`
   }
 `;
 
+export const PointsBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: ${(props) => props.theme.spacing[2]};
+  padding: ${(props) => props.theme.spacing[1]}
+    ${(props) => props.theme.spacing[2]};
+  background: ${(props) => props.theme.colors.accent};
+  color: ${(props) => props.theme.colors.accentForeground};
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: ${(props) => props.theme.fontSizes.xs};
+`;
+
 export const MainContent = styled.div`
   max-width: 1280px;
   margin: 0 auto;
@@ -174,6 +187,7 @@ export const Grid = styled.div`
     grid-template-columns: repeat(2, 1fr);
   }
 `;
+
 
 export const Card = styled.div`
   background-color: ${(props) => props.theme.colors.card};
