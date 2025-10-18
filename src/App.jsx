@@ -13,6 +13,7 @@ import { ProjectLayout } from "./component/project/layout/ProjectLayout";
 import { WelcomePage } from "./pages/project/dashboard/WelcomePage";
 import { EditorPage } from "./pages/project/editor/EditorPage";
 import { GraphPage } from "./pages/project/graph/GraphPage";
+import { ConversionPage } from "./pages/project/conversion/ConversionPage";
 
 const App = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -37,6 +38,7 @@ const App = () => {
           <Route path="editor" element={<EditorPage />} />
           <Route path="editor/:noteId" element={<EditorPage />} />
           <Route path="graph" element={<GraphPage />} />
+          <Route path="convert" element={<ConversionPage />} />
         </Route>
         {/* Redirect old /dashboard route to new structure */}
         <Route

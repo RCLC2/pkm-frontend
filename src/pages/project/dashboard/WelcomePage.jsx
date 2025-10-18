@@ -4,7 +4,8 @@ import { useOutletContext } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ThemeProvider } from "styled-components";
 import { theme } from "../../../styled/thema";
-import { getProjectStats, formatDate } from "./mockdata/savedProjects";
+import { getProjectStats, formatDate } from "../../../mocks/hooks/project/savedProjects";
+import { welcomePageMockRecentActivity } from "../../../mocks/component/project/welcomePageMock";
 import * as S from "./WelcomePageStyled";
 import {
   BookOpen,
@@ -69,27 +70,6 @@ export function WelcomePage() {
 
     setRecentActivity(activities);
   }, []);
-
-  const mockRecentActivity = [
-    {
-      type: "note",
-      title: "Knowledge Management Systems",
-      action: "Updated",
-      time: "2 hours ago",
-    },
-    {
-      type: "connection",
-      title: "Linked Atomic Notes to Learning",
-      action: "Created",
-      time: "4 hours ago",
-    },
-    {
-      type: "tag",
-      title: "Added #productivity tag",
-      action: "Tagged",
-      time: "1 day ago",
-    },
-  ];
 
   const quickActionsSection = (
     <S.Section>
@@ -190,7 +170,7 @@ export function WelcomePage() {
                         </S.ActivityContent>
                       </S.ActivityItem>
                     ))
-                  : mockRecentActivity.map((activity, index) => (
+                  : welcomePageMockRecentActivity.map((activity, index) => (
                       <S.ActivityItem key={index}>
                         <S.ActivityIcon>
                           {activity.type === "note" && <FileText size={16} />}

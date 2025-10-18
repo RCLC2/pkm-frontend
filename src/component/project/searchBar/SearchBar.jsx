@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ThemeProvider } from "styled-components";
-import { theme } from "../../styled/thema";
+import { theme } from "../../../styled/thema";
 import * as S from "./SearchBarStyled";
 import { Search, Filter } from "lucide-react";
 

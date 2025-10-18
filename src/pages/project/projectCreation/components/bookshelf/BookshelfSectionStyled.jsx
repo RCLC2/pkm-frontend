@@ -76,17 +76,22 @@ export const BookSpine = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: ${(props) => props.theme.spacing[2]};
   color: #ffffff;
+  height: 100%;
   writing-mode: vertical-rl;
-  transform: rotate(180deg);
+  text-orientation: mixed;
   text-align: center;
   font-weight: 600;
+  white-space: nowrap;
+  line-height: 1.2;
 `;
 
 export const BookTitle = styled.span`
   font-size: ${(props) => props.theme.fontSizes.sm};
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
+  word-break: keep-all;
 `;
 
 export const BookBadge = styled.span`
@@ -99,6 +104,8 @@ export const BookBadge = styled.span`
   background: rgba(255, 255, 255, 0.2);
   font-size: ${(props) => props.theme.fontSizes.xs};
   font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1;
 `;
 
 export const BookBadgeSecondary = styled(BookBadge)`
@@ -107,10 +114,18 @@ export const BookBadgeSecondary = styled(BookBadge)`
 
 export const BookEdge = styled.div`
   position: absolute;
-  right: -8px;
   top: 8%;
   bottom: 8%;
-  width: 14px;
+  width: ${(props) => {
+    const base = props.$thickness || 32;
+    const width = Math.max(12, Math.min(30, base * 0.35));
+    return `${width}px`;
+  }};
+  right: ${(props) => {
+    const base = props.$thickness || 32;
+    const offset = Math.max(8, Math.min(20, base * 0.25));
+    return `-${offset}px`;
+  }};
   background: repeating-linear-gradient(
     90deg,
     #f5f5f0,

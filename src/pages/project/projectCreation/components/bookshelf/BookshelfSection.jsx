@@ -24,8 +24,9 @@ export const BookshelfSection = ({
           $shelf={getPreviewStyle("shelf", bookshelfTheme.shelf)}
         >
           {projects.map((project, index) => {
-            const thickness = getBookThickness(project.noteCount);
-            const height = 160 + Math.min(80, (project.noteCount || 0) * 5);
+            const noteCount = Math.max(0, Number(project.noteCount) || 0);
+            const thickness = getBookThickness(noteCount);
+            const height = 160 + Math.min(80, noteCount * 5);
             const template = templates.find((item) => item.id === project.templateId);
             const badgeLabel =
               project.methodology === "zettelkasten"
@@ -43,11 +44,11 @@ export const BookshelfSection = ({
                 <B.BookSpine>
                   <B.BookTitle>{project.name}</B.BookTitle>
                   <B.BookBadge>
-                    {project.noteCount} {DEFAULT_NOTE_COUNT_LABEL}
+                    {noteCount} {DEFAULT_NOTE_COUNT_LABEL}
                   </B.BookBadge>
                   <B.BookBadgeSecondary>{badgeLabel}</B.BookBadgeSecondary>
                 </B.BookSpine>
-                <B.BookEdge />
+                <B.BookEdge $thickness={thickness} />
                 <B.BookFooter>
                   <span>Last edited {formatDate(project.lastModified)}</span>
                   <B.BookFooterButton
@@ -70,26 +71,30 @@ export const BookshelfSection = ({
       </B.BookshelfScene>
 
       <B.ProjectInsightGrid>
-        {projects.map((project) => (
-          <B.ProjectInsightCard key={`${project.id}-insight`}>
-            <B.ProjectInsightTitle>{project.name}</B.ProjectInsightTitle>
-            <B.ProjectInsightMeta>
-              <span>
-                <strong>{project.noteCount}</strong> linked {DEFAULT_NOTE_COUNT_LABEL}
-              </span>
-              <span>{formatDate(project.lastModified)}</span>
-            </B.ProjectInsightMeta>
-            <B.ProjectInsightActions>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenProject(project)}
-              >
-                Continue
-              </Button>
-            </B.ProjectInsightActions>
-          </B.ProjectInsightCard>
-        ))}
+        {projects.map((project) => {
+          const noteCount = Math.max(0, Number(project.noteCount) || 0);
+
+          return (
+            <B.ProjectInsightCard key={`${project.id}-insight`}>
+              <B.ProjectInsightTitle>{project.name}</B.ProjectInsightTitle>
+              <B.ProjectInsightMeta>
+                <span>
+                  <strong>{noteCount}</strong> linked {DEFAULT_NOTE_COUNT_LABEL}
+                </span>
+                <span>{formatDate(project.lastModified)}</span>
+              </B.ProjectInsightMeta>
+              <B.ProjectInsightActions>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenProject(project)}
+                >
+                  Continue
+                </Button>
+              </B.ProjectInsightActions>
+            </B.ProjectInsightCard>
+          );
+        })}
       </B.ProjectInsightGrid>
     </>
   );

@@ -4,10 +4,11 @@ import { useState } from "react";
 import { ThemeProvider } from "styled-components";
 import { theme } from "../../../styled/thema";
 import { ProjectCreation } from "../projectCreation/ProjectCreation";
-import { Sidebar } from "../../../component/project/Sidebar";
-import { NoteEditor } from "../../../component/project/NoteEditor";
-import { GraphView } from "../../../component/project/GraphView";
-import { SearchBar } from "../../../component/project/SearchBar";
+import { Sidebar } from "../../../component/project/sidebar/Sidebar";
+import { NoteEditor } from "../../../component/project/noteEditor/NoteEditor";
+import { GraphView } from "../../../component/project/graphView/GraphView";
+import { SearchBar } from "../../../component/project/searchBar/SearchBar";
+import { mockSavedProjects } from "../../../mocks/hooks/project/savedProjects";
 import * as S from "./DashboardStyled";
 import {
   Network,

@@ -3,7 +3,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { ProjectCreation } from "./projectCreation/ProjectCreation";
-import { mockSavedProjects } from "./dashboard/mockdata/savedProjects";
+import { mockSavedProjects } from "../../mocks/hooks/project/savedProjects";
 
 export function ProjectsPage() {
   const navigate = useNavigate();

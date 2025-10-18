@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { ThemeProvider } from "styled-components";
-import { theme } from "../../styled/thema";
+import { theme } from "../../../styled/thema";
 import * as S from "./GraphViewStyled";
 import { ZoomIn, ZoomOut, Maximize, RotateCcw } from "lucide-react";
 

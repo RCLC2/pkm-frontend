@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { ThemeProvider } from "styled-components";
-import { theme } from "../../styled/thema";
+import { theme } from "../../../styled/thema";
+import { sidebarMockNotes } from "../../../mocks/component/project/sidebarMock";
 import * as S from "./SidebarStyled";
 import {
   ChevronDown,
@@ -14,46 +15,6 @@ import {
   Archive,
   Hash,
 } from "lucide-react";
-
-const mockNotes = {
-  projects: [
-    { id: "project-1", title: "AI Research Paper", tags: ["#research", "#ai"] },
-    { id: "project-2", title: "Website Redesign", tags: ["#design", "#web"] },
-  ],
-  areas: [
-    { id: "area-1", title: "Personal Development", tags: ["#growth"] },
-    { id: "area-2", title: "Health & Fitness", tags: ["#health"] },
-  ],
-  resources: [
-    {
-      id: "resource-1",
-      title: "Design Principles",
-      tags: ["#design", "#reference"],
-    },
-    {
-      id: "resource-2",
-      title: "Programming Best Practices",
-      tags: ["#coding"],
-    },
-  ],
-  archive: [
-    { id: "archive-1", title: "Old Project Notes", tags: ["#archived"] },
-  ],
-  zettelkasten: [
-    { id: "welcome-note", title: "Welcome to Zettelkasten", tags: ["#intro"] },
-    {
-      id: "note-1",
-      title: "Knowledge Management Systems",
-      tags: ["#knowledge", "#systems"],
-    },
-    {
-      id: "note-2",
-      title: "Atomic Notes Concept",
-      tags: ["#atomic", "#notes"],
-    },
-    { id: "note-3", title: "Linking Ideas Together", tags: ["#connections"] },
-  ],
-};
 
 export function Sidebar({ activeNote, onNoteSelect, methodology }) {
   const getInitialSections = () => {
@@ -103,7 +64,7 @@ export function Sidebar({ activeNote, onNoteSelect, methodology }) {
           key: "zettelkasten",
           title: "Zettelkasten",
           icon: Hash,
-          notes: mockNotes.zettelkasten,
+          notes: sidebarMockNotes.zettelkasten,
         },
       ];
     } else {
@@ -112,20 +73,25 @@ export function Sidebar({ activeNote, onNoteSelect, methodology }) {
           key: "projects",
           title: "Projects",
           icon: Briefcase,
-          notes: mockNotes.projects,
+          notes: sidebarMockNotes.projects,
         },
-        { key: "areas", title: "Areas", icon: Target, notes: mockNotes.areas },
+        {
+          key: "areas",
+          title: "Areas",
+          icon: Target,
+          notes: sidebarMockNotes.areas,
+        },
         {
           key: "resources",
           title: "Resources",
           icon: BookOpen,
-          notes: mockNotes.resources,
+          notes: sidebarMockNotes.resources,
         },
         {
           key: "archive",
           title: "Archive",
           icon: Archive,
-          notes: mockNotes.archive,
+          notes: sidebarMockNotes.archive,
         },
       ];
     }

@@ -27,7 +27,7 @@ const TiptapEditor = ({ content, onChange, yorkieDoc }) => {
   useEffect(() => {
     if (!yorkieDoc || !editor) return;
 
-    const unsubscribe = yorkieDoc.subscribe((event) => {
+    const unsubscribe = yorkieDoc.subscribe(() => {
       const newContent = yorkieDoc.getRoot().content;
       if (newContent !== editor.getHTML()) {
         editor.commands.setContent(newContent);

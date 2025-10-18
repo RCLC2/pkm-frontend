@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useOutletContext } from "react-router-dom";
-import { NoteEditor } from "../../../component/project/NoteEditor";
+import { NoteEditor } from "../../../component/project/noteEditor/NoteEditor";
 
 export function EditorPage() {
   const { noteId } = useParams();

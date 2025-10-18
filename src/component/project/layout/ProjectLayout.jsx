@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation, Outlet } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
 import { theme } from "../../../styled/thema";
-import { Sidebar } from "../Sidebar";
-import { SearchBar } from "../SearchBar";
+import { Sidebar } from "../sidebar/Sidebar";
+import { SearchBar } from "../searchBar/SearchBar";
 import * as S from "./ProjectLayoutStyled";
 import {
   FileText,
@@ -14,6 +14,7 @@ import {
   BookOpen,
   Briefcase,
   ArrowLeft,
+  ArrowRightLeft,
 } from "lucide-react";
 
 export function ProjectLayout() {
@@ -27,6 +28,7 @@ export function ProjectLayout() {
   const getActiveView = () => {
     if (location.pathname.includes("/editor")) return "editor";
     if (location.pathname.includes("/graph")) return "graph";
+    if (location.pathname.includes("/convert")) return "convert";
     return "dashboard";
   };
 
@@ -52,6 +54,8 @@ export function ProjectLayout() {
       navigate(`/dashboard/editor/${activeNote}`);
     } else if (view === "graph") {
       navigate("/dashboard/graph");
+    } else if (view === "convert") {
+      navigate("/dashboard/convert");
     } else {
       navigate("/dashboard");
     }
@@ -127,6 +131,13 @@ export function ProjectLayout() {
                 >
                   <Network size={16} />
                   Graph
+                </S.TabButton>
+                <S.TabButton
+                  active={activeView === "convert"}
+                  onClick={() => handleViewChange("convert")}
+                >
+                  <ArrowRightLeft size={16} />
+                  Convert
                 </S.TabButton>
               </S.TabsContainer>
 

@@ -299,6 +299,11 @@ export const Button = styled.button`
   transition: all 0.2s;
   border: none;
 
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
   ${(props) =>
     props.variant === "primary" &&
     `
@@ -457,4 +462,210 @@ export const DeleteButton = styled(Button)`
   ${Card}:hover & {
     opacity: 1;
   }
+`;
+
+export const WizardCard = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing[6]};
+  background: ${({ theme }) => theme.colors.card};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  padding: ${({ theme }) => theme.spacing[6]};
+  max-width: 960px;
+  margin: 0 auto;
+`;
+
+export const StepHeader = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing[3]};
+`;
+
+export const StepList = styled.ol`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.spacing[6]};
+  margin: 0;
+  padding: 0;
+  list-style: none;
+`;
+
+export const StepItem = styled.li`
+  display: flex;
+  align-items: flex-start;
+  gap: ${({ theme }) => theme.spacing[3]};
+  opacity: ${({ $status }) => ($status === "upcoming" ? 0.6 : 1)};
+`;
+
+export const StepMarker = styled.span`
+  height: 2.25rem;
+  width: 2.25rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  background: ${({ $status, theme }) => {
+    if ($status === "complete") return theme.colors.accent;
+    if ($status === "active") return theme.colors.primary;
+    return theme.colors.secondary;
+  }};
+  color: ${({ $status, theme }) => {
+    if ($status === "complete") return theme.colors.accentForeground;
+    if ($status === "active") return theme.colors.primaryForeground;
+    return theme.colors.mutedForeground;
+  }};
+  border: ${({ $status, theme }) =>
+    $status === "upcoming" ? `1px solid ${theme.colors.border}` : "none"};
+`;
+
+export const StepInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing[1]};
+`;
+
+export const StepTitle = styled.span`
+  font-weight: 600;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+`;
+
+export const StepDescription = styled.span`
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  color: ${({ theme }) => theme.colors.mutedForeground};
+`;
+
+export const WizardBody = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing[5]};
+`;
+
+export const StepIntro = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing[2]};
+`;
+
+export const StepHeading = styled.h3`
+  margin: 0;
+  font-size: ${({ theme }) => theme.fontSizes["2xl"]};
+  font-weight: 600;
+`;
+
+export const StepText = styled.p`
+  margin: 0;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.mutedForeground};
+`;
+
+export const SelectionGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: ${({ theme }) => theme.spacing[5]};
+`;
+
+export const SelectionCard = styled.button`
+  border: 1px solid
+    ${({ $selected, theme }) =>
+      $selected ? theme.colors.accent : theme.colors.border};
+  background: ${({ theme }) => theme.colors.secondary};
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  padding: ${({ theme }) => theme.spacing[5]};
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: ${({ theme }) => theme.spacing[4]};
+  cursor: pointer;
+  text-align: left;
+  color: ${({ theme }) => theme.colors.foreground};
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: ${({ $selected, theme }) =>
+    $selected ? `0 0 0 2px ${theme.colors.accent}33` : "none"};
+
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.accent};
+    transform: translateY(-2px);
+  }
+`;
+
+export const SelectionIcon = styled.div`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: ${({ theme }) => theme.spacing[2]};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  background: ${({ theme }) => theme.colors.accent}22;
+  color: ${({ theme }) => theme.colors.accent};
+`;
+
+export const SelectionTitle = styled.span`
+  font-size: ${({ theme }) => theme.fontSizes.lg};
+  font-weight: 600;
+`;
+
+export const SelectionDescription = styled.span`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.mutedForeground};
+`;
+
+export const SelectionHighlights = styled.ul`
+  margin: 0;
+  padding-left: ${({ theme }) => theme.spacing[4]};
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing[2]};
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  color: ${({ theme }) => theme.colors.mutedForeground};
+
+  li {
+    list-style: disc;
+  }
+`;
+
+export const WizardActions = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: ${({ theme }) => theme.spacing[3]};
+`;
+
+export const StepSummary = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing[3]};
+  margin-bottom: ${({ theme }) => theme.spacing[4]};
+`;
+
+export const SummaryRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[3]};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.mutedForeground};
+`;
+
+export const SummaryBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing[2]};
+  padding: ${({ theme }) => theme.spacing[1]}
+    ${({ theme }) => theme.spacing[3]};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  background: ${({ theme }) => theme.colors.muted};
+  color: ${({ theme }) => theme.colors.mutedForeground};
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+`;
+
+export const StepEmpty = styled.div`
+  border: 1px dashed ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  padding: ${({ theme }) => theme.spacing[6]};
+  text-align: center;
+  color: ${({ theme }) => theme.colors.mutedForeground};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
 `;

@@ -2,7 +2,7 @@
 
 import { Navigate } from "react-router-dom";
 import { useEffect } from "react";
-import { mockSavedProjects } from "./mockdata/savedProjects";
+import { mockSavedProjects } from "../../../mocks/hooks/project/savedProjects";
 
 // Legacy Dashboard component - redirects to new routing structure
 export default function Dashboard() {
