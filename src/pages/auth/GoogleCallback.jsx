@@ -16,7 +16,7 @@ export default function GoogleCallback() {
   }, [code, mutate]);
 
   return (
-    <p style={{ color: "white" }}>
+    <p style={{ backgroundColor: "black", height: "100vh" }}>
       {isLoading ? "Google 로그인 처리 중..." : "처리 준비 중..."}
     </p>
   );

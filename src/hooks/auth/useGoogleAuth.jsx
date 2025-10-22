@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { beginGoogleLogin, sendGoogleCode } from "../../api/googleAuthApi";
+import { beginGoogleLogin, sendGoogleCode } from "../../api/auth/googleAuthApi";
 import { useNavigate } from "react-router-dom";
 
 export function useBeginGoogleLogin() {
@@ -13,8 +13,7 @@ export function useHandleGoogleCode(code) {
     mutationFn: async () => {
       if (!code) throw new Error("Google authorization code not found");
       const data = await sendGoogleCode(code);
-      // accessToken을 프론트 저장소에 둘 필요 없으면 생략
-      // 필요 시: sessionStorage.setItem("accessToken", data.accessToken);
+
       return data;
     },
     onSuccess: () => {
