@@ -1,0 +1,48 @@
+import { api } from "../axiosInterceptApi";
+
+const noteApi = api("note");
+
+// 노트 생성
+export const createNote = async () => {
+  const res = await noteApi.post(`/note/create`);
+  return res.data.data;
+};
+
+// 노트 단일 조회
+export const getNoteById = async (id) => {
+  const res = await noteApi.get(`/note/${id}`);
+  return res.data.data;
+};
+
+// 노트 수정
+export const updateNote = async (id) => {
+  const res = await noteApi.put(`/note/update/${id}`);
+  return res.data.data;
+};
+
+// 노트 삭제
+export const deleteNote = async (id) => {
+  const res = await noteApi.delete(`/note/delete/${id}`);
+  return res.data.data;
+};
+
+// 노트 검색으로 조회
+// params: { workspaceId, keyword, page, size, sort, direction }
+export const searchNotesByKeword = async (params) => {
+  const res = await noteApi.get("/note/search", { params });
+  return res.data.data;
+};
+
+// 최근 노트 목록 조회
+// params: { workspaceId, page, size, sort, direction }
+export const getRecentNotes = async (params) => {
+  const res = await noteApi.get("/note/recent", { params });
+  return res.data.data;
+};
+
+// workspaceId 목록 기반 조회
+// params: { workspaceId }
+export const getNotesByIds = async (params) => {
+  const res = await noteApi.get("/note/ids", { params });
+  return res.data.data;
+};
