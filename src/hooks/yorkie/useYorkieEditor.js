@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback } from "react";  
 import * as yorkie from "@yorkie-js/sdk";  
-import { createYorkieAuthTokenInjector } from "../api/yorkieAuthApi";  
+import { createYorkieAuthTokenInjector } from "../../api/auth/yorkieAuthApi";  
   
 const RPC_ADDR = import.meta.env.VITE_YORKIE_URL || "http://localhost:8085";  
-const API_KEY = import.meta.env.VITE_YORKIE_API_KEY || "";  
+const API_KEY = "";  
+// todo. 이 값은 그래프 서비스에서 워크스페이스 조회시 yorkieProject publicKey를 주입해야 한다.
   
 export function useYorkieEditor(docKey, noteId) {  
   const [client, setClient] = useState(null);  
@@ -29,7 +30,7 @@ export function useYorkieEditor(docKey, noteId) {
   
         clientInstance = new yorkie.Client({  
           rpcAddr: RPC_ADDR,  
-          apiKey: API_KEY,  
+          // apiKey: API_KEY,  
           authTokenInjector,  
         });  
           

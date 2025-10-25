@@ -1,5 +1,4 @@
-import { api } from "./api";  
-  
+import { api } from "../axiosInterceptApi";
 
 export const issueYorkieToken = async (noteId) => {  
   const userApi = api("user");  
