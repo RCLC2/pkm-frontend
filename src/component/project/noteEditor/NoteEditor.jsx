@@ -11,11 +11,10 @@ import { useUpdateNote } from "../../../hooks/note/useUpdateNote";
 import { useDeleteNote } from "../../../hooks/note/useDeleteNote";
 
 export function NoteEditor({ noteId }) {
-
+  const { doc, updateDoc, status, error, isAttached } = useYorkieEditor(`note-${noteId}`, noteId);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [tags, setTags] = useState([]);
-  const { doc, updateDoc, status, error, isAttached } = useYorkieEditor(`note-${noteId}`);
   const [newTag, setNewTag] = useState("");
 
   // 노트 단일 조회

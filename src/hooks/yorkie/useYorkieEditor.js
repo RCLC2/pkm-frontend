@@ -1,10 +1,11 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
-import * as yorkie from "@yorkie-js/sdk";
-
-const RPC_ADDR = import.meta.env.VITE_YORKIE_URL || "http://localhost:8085";
-const API_KEY = import.meta.env.VITE_YORKIE_API_KEY || "";
-
-export function useYorkieEditor(docKey) {  
+import { useEffect, useState, useCallback } from "react";  
+import * as yorkie from "@yorkie-js/sdk";  
+import { createYorkieAuthTokenInjector } from "../api/yorkieAuthApi";  
+  
+const RPC_ADDR = import.meta.env.VITE_YORKIE_URL || "http://localhost:8085";  
+const API_KEY = import.meta.env.VITE_YORKIE_API_KEY || "";  
+  
+export function useYorkieEditor(docKey, noteId) {  
   const [client, setClient] = useState(null);  
   const [doc, setDoc] = useState(null);  
   const [status, setStatus] = useState("준비됨");  
@@ -13,7 +14,7 @@ export function useYorkieEditor(docKey) {
   const [root, setRoot] = useState({});  
   
   useEffect(() => {  
-    if (!docKey) return;  
+    if (!docKey || !noteId) return;  
   
     let clientInstance = null;  
     let docInstance = null;  
@@ -23,19 +24,32 @@ export function useYorkieEditor(docKey) {
       try {  
         setStatus("Yorkie 연결 중...");  
         setError("");  
+   
+        const authTokenInjector = createYorkieAuthTokenInjector(noteId);  
   
         clientInstance = new yorkie.Client({  
           rpcAddr: RPC_ADDR,  
           apiKey: API_KEY,  
+          authTokenInjector,  
         });  
+          
         await clientInstance.activate();  
         setClient(clientInstance);  
   
         docInstance = new yorkie.Document(docKey);  
-            
+           
         unsubs.push(  
           docInstance.subscribe(() => {  
             setRoot(docInstance.getRoot());  
+          })  
+        );  
+  
+        unsubs.push(  
+          docInstance.subscribe("auth-error", (event) => {  
+            const msg = `Auth Error: method=${event.value.method}, reason=${event.value.reason}`;  
+            setError(msg);  
+            setStatus("인증 오류 발생");  
+            console.error(msg);  
           })  
         );  
   
@@ -83,7 +97,7 @@ export function useYorkieEditor(docKey) {
         }  
       })();  
     };  
-  }, [docKey]);  
+  }, [docKey, noteId]);  
   
   const updateDoc = useCallback((updater, message) => {  
     if (doc) {  
