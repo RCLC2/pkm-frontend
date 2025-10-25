@@ -346,6 +346,34 @@ export const Button = styled.button`
   `}
 `;
 
+export const CustomizationCallout = styled.div`
+  margin-top: ${(props) => props.theme.spacing[12]};
+  padding: ${(props) => props.theme.spacing[6]};
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${(props) => props.theme.spacing[6]};
+  flex-wrap: wrap;
+  background: ${(props) => props.theme.colors.card};
+  border: 1px solid ${(props) => props.theme.colors.border};
+  border-radius: ${(props) => props.theme.borderRadius.xl};
+  box-shadow: ${(props) => props.theme.shadows.lg};
+`;
+
+export const CustomizationCalloutTitle = styled.h3`
+  margin: 0 0 ${(props) => props.theme.spacing[2]} 0;
+  font-size: ${(props) => props.theme.fontSizes["2xl"]};
+  font-weight: 600;
+`;
+
+export const CustomizationCalloutDescription = styled.p`
+  margin: 0;
+  font-size: ${(props) => props.theme.fontSizes.sm};
+  color: ${(props) => props.theme.colors.mutedForeground};
+  max-width: 32rem;
+  line-height: 1.6;
+`;
+
 export const FormCard = styled(Card)`
   max-width: 32rem;
   margin: 0 auto;

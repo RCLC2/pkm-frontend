@@ -4,7 +4,12 @@ import { useOutletContext } from "react-router-dom";
 import { GraphView } from "../../../component/project/graphView/GraphView";
 
 export function GraphPage() {
-  const { methodology } = useOutletContext();
+  const { methodology, onNavigateToNote } = useOutletContext();
 
-  return <GraphView methodology={methodology} />;
+  return (
+    <GraphView
+      methodology={methodology}
+      onNavigateToNote={onNavigateToNote}
+    />
+  );
 }

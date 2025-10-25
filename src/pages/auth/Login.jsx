@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
-import * as S from "./styled/LoginStyled"
-import React, { useState, useEffect } from "react"
-import { ArrowBigLeftDash, Home, User, Settings } from "lucide-react"
+import * as S from "./styled/LoginStyled";
+import React, { useState } from "react";
+import { ArrowBigLeftDash } from "lucide-react";
 // import { login } from "../../hook/Auth/AuthLogin";
 // import { Verify } from "../../hook/Auth/AuthVerify";
 // import { useNavigate } from "react-router-dom";
@@ -9,8 +9,6 @@ import { ArrowBigLeftDash, Home, User, Settings } from "lucide-react"
 const LoginPage = () => {
   const [userName, setUserName] = useState("");
   const [password, serPassword] = useState("");
-  const [isLoaded, setIsLoaded] = useState(true);
-
   // const navigate = useNavigate();
 
   // useEffect(() => {
@@ -26,10 +24,9 @@ const LoginPage = () => {
 
   // 로그인 요청 처리
   const handleLogin = async () => {
-   // const handleLogin = async (e) => {
+    // const handleLogin = async (e) => {
     // e.preventDefault();
     // const result = await login({ username: userName, password });
-
     // if (result.success) {
     //   alert("반갑습니다 " + userName + "님!")
     //   // 로그인 성공 시 처리
@@ -37,146 +34,83 @@ const LoginPage = () => {
     // } else {
     //   alert("로그인 실패: " + result.error)
     // }
-  }
-
-  const [shouldRenderSpline, setShouldRenderSpline] = useState(false);
-  const splineRef = React.useRef(null);
-
-  useEffect(() => {
-    let frameCount = 0;
-    let startTime = performance.now();
-
-    const checkFPS = () => {
-      frameCount++;
-      const now = performance.now();
-      const duration = now - startTime;
-
-      if (duration >= 1000) {
-        const fps = (frameCount / duration) * 1000;
-
-        if (fps >= 100) setShouldRenderSpline(true);
-        else {
-          setShouldRenderSpline(false);
-          setTimeout(() => {
-            if (splineRef.current && splineRef.current.stop) {
-              splineRef.current.stop();
-            }
-          }, 3000);
-        }
-
-        return;
-      }
-
-      requestAnimationFrame(checkFPS);
-    };
-
-    requestAnimationFrame(checkFPS);
-  }, []);
+  };
 
   return (
     <S.LoginWrapper>
-      {/* Navigation Bar */}
-      <S.NavigationBar>
-        <S.NavLogo>
-          <img src="/svg/hspace-logo-edited.svg" alt="H-Space Logo" />
-        </S.NavLogo>
-        <S.NavLinks>
-          <S.NavLink to="/">
-            <Home size={16} style={{ marginRight: '5px' }} />
-            Home
-          </S.NavLink>
-          <S.NavLink to="/dashboard">
-            <User size={16} style={{ marginRight: '5px' }} />
-            Dashboard
-          </S.NavLink>
-          <S.NavLink to="/settings">
-            <Settings size={16} style={{ marginRight: '5px' }} />
-            Settings
-          </S.NavLink>
-        </S.NavLinks>
-        <S.NavButton>
-          Get Started
-        </S.NavButton>
-      </S.NavigationBar>
+      <S.BackgroundGlow />
+      <S.BackgroundGradient />
+      <S.Content>
+        <S.BrandPanel>
+          <S.BackLink to="/">
+            <ArrowBigLeftDash size={18} />
+            돌아가기
+          </S.BackLink>
+          <S.BrandHeading>
+            영감을 다시 불러오고, 당신만의 지식을 정리하세요.
+          </S.BrandHeading>
+          <S.BrandCopy>
+            H-Space는 창작자와 연구자에게 맞춤화된 워크스페이스를 제공해
+            프로젝트를 빠르게 시작하고 끝까지 완성하도록 도와드립니다.
+          </S.BrandCopy>
+          <S.FeatureList>
+            <li>프로젝트별 맞춤 서가 테마 유지</li>
+            <li>워크플로우에 맞춘 템플릿으로 바로 시작</li>
+            <li>팀과 지식을 공유하며 발전시키기</li>
+          </S.FeatureList>
+        </S.BrandPanel>
 
-      {/* <S.SplineObjectWrapper>
-        <Spline
-          ref={splineRef}
-          scene={
-            shouldRenderSpline
-              ? "/spline/domino.spline"
-              : "/spline/norotate.spline"
-          }
-          onLoad={() => setIsLoaded(true)}
-          onError={(e) => {
-            console.error("🔴 Spline load error", e);
-            setShouldRenderSpline(false);
-          }}
-        />
-      </S.SplineObjectWrapper> */}
+        <S.FormSection>
+          <S.FormHeader>
+            <S.FormTitle>로그인</S.FormTitle>
+            <S.FormSubtitle>
+              계정에 접속해 당신의 책장을 계속 디자인하고 관리하세요.
+            </S.FormSubtitle>
+          </S.FormHeader>
 
-      {/* {isLoaded ? ( */}
-        <>
-          {/* 여기 로그인 폼 */}
-          <S.LoginForm onSubmit={handleLogin}>         
-              <S.ArrowBigLeftDash>
-                <S.A to="/"><ArrowBigLeftDash/></S.A>
-              </S.ArrowBigLeftDash> 
-            <S.LogoImag>
-              <img src="/svg/hspace-logo-edited.svg" alt="logo"/>
-            </S.LogoImag>
-            {/* <h1>Login</h1> */}
-            <S.InputWrapper>
-              <S.Input>
-                <S.InputTag
-                  id="LidInput"
-                  type="text"
-                  required
-                  equal={true}
-                  onChange={(e) => setUserName(e.target.value)}
-                ></S.InputTag>
-                <S.Label htmlFor="LidInput">ID: </S.Label>
-                <S.UnderLine></S.UnderLine>
-              </S.Input>
-              <S.Input>
-                <S.InputTag
-                  id="password"
-                  type="password"
-                  required
-                  equal={true}
-                  onChange={(e) => serPassword(e.target.value)}
-                ></S.InputTag>
-                <S.Label htmlFor="password">PW: </S.Label>
-                <S.UnderLine></S.UnderLine>
-              </S.Input>
-            </S.InputWrapper>
-            <S.LoginButtonWrapper>
-              <S.LoginButton type="submit">Login</S.LoginButton>
-              <S.SplitLine><hr/> · <hr/></S.SplitLine>
-              <S.GoogleLoginButton>
-                <img src="/img/Google__G__logo.svg.webp" alt="google logo"/>
-                Login With Google
-              </S.GoogleLoginButton>
-            </S.LoginButtonWrapper>
-            <S.A to="/signup">You don't have an account?</S.A>
+          <S.LoginForm onSubmit={handleLogin}>
+            <S.Field>
+              <S.FieldLabel htmlFor="LidInput">아이디</S.FieldLabel>
+              <S.InputControl
+                id="LidInput"
+                type="text"
+                required
+                autoComplete="username"
+                onChange={(e) => setUserName(e.target.value)}
+              />
+            </S.Field>
+            <S.Field>
+              <S.FieldLabel htmlFor="password">비밀번호</S.FieldLabel>
+              <S.InputControl
+                id="password"
+                type="password"
+                required
+                autoComplete="current-password"
+                onChange={(e) => serPassword(e.target.value)}
+              />
+            </S.Field>
+            <S.Actions>
+              <S.LoginButton type="submit">로그인</S.LoginButton>
+            </S.Actions>
           </S.LoginForm>
-          <S.EffectDiv/>
-          <S.EffectEntire/>
-        </>
-      {/* ) : (
-        <div style={{
-          color: 'white',
-          height: '100vh',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          fontSize: '1.5em'
-        }}>
-          Loading...
-        </div> */}
-      {/* )} */}
+
+          <S.Divider>
+            <span>또는</span>
+          </S.Divider>
+
+          <S.GoogleLoginButton type="button">
+            <img src="/img/Google__G__logo.svg.webp" alt="Google logo" />
+            Google 계정으로 계속
+          </S.GoogleLoginButton>
+
+          <S.SignUpText>
+            아직 계정이 없으신가요?
+            <S.SignUpLink to="/signup">회원가입</S.SignUpLink>
+          </S.SignUpText>
+        </S.FormSection>
+      </S.Content>
     </S.LoginWrapper>
-  )
-}
+  );
+};
 
 export default LoginPage;
