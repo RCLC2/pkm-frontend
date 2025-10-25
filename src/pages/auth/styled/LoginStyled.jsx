@@ -2,385 +2,319 @@ import styled from "styled-components"
 import { Link } from "react-router-dom"
 
 export const LoginWrapper = styled.div`
+  position: relative;
+  min-height: 100vh;
+  padding: 4rem 1.5rem;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  width: 100vw; 
-  /* background: url("/img/pexels-francesco-ungaro-998641.jpg") no-repeat center center fixed;
-  background-size: cover; */
-  background-color: #000;
-
+  background: radial-gradient(circle at 15% 20%, rgba(103, 72, 255, 0.35), transparent 55%),
+    radial-gradient(circle at 85% 15%, rgba(58, 155, 255, 0.25), transparent 50%),
+    radial-gradient(circle at 50% 80%, rgba(255, 80, 120, 0.2), transparent 55%),
+    #050507;
   overflow: hidden;
-`
+  color: #f9fafb;
+`;
 
-export const NavigationBar = styled.nav`
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 500;
-  
-  width: 90%;
-  max-width: 1200px;
-  height: 60px;
-  
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 15px;
-  
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-  
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  
-  @media (max-width: 768px) {
-    width: 95%;
-    height: 50px;
-    top: 15px;
-    padding: 0 15px;
+export const BackgroundGlow = styled.div`
+  position: absolute;
+  inset: -25% auto auto -15%;
+  width: 560px;
+  height: 560px;
+  background: radial-gradient(circle, rgba(130, 108, 255, 0.5), transparent 70%);
+  filter: blur(80px);
+  opacity: 0.8;
+  pointer-events: none;
+`;
+
+export const BackgroundGradient = styled.div`
+  position: absolute;
+  inset: auto -20% -35% auto;
+  width: 640px;
+  height: 640px;
+  background: radial-gradient(circle, rgba(59, 173, 255, 0.45), transparent 65%);
+  filter: blur(120px);
+  opacity: 0.75;
+  pointer-events: none;
+`;
+
+export const Content = styled.div`
+  position: relative;
+  width: min(960px, 100%);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  background: rgba(12, 12, 18, 0.75);
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(20px);
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
   }
 `;
 
-export const NavLogo = styled.div`
+export const BrandPanel = styled.div`
+  position: relative;
+  padding: 3.5rem 3rem;
   display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  background: linear-gradient(155deg, rgba(67, 36, 180, 0.75) 0%, rgba(18, 18, 26, 0.85) 60%, rgba(5, 5, 10, 0.9) 100%);
+
+  @media (max-width: 900px) {
+    padding: 3rem 2.25rem;
+  }
+`;
+
+export const BackLink = styled(Link)`
+  display: inline-flex;
   align-items: center;
-  
+  gap: 0.5rem;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: color 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    color: #ffffff;
+    transform: translateX(-2px);
+  }
+`;
+
+export const BrandLogo = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+
   img {
-    height: 35px;
+    height: 44px;
     width: auto;
   }
-  
-  @media (max-width: 768px) {
-    img {
-      height: 30px;
-    }
+
+  span {
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.82);
   }
 `;
 
-export const NavLinks = styled.div`
+export const BrandHeading = styled.h1`
+  margin: 0;
+  font-size: clamp(1.9rem, 2.6vw, 2.6rem);
+  font-weight: 600;
+  line-height: 1.15;
+  color: #ffffff;
+`;
+
+export const BrandCopy = styled.p`
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.78);
+`;
+
+export const FeatureList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.9rem;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  li::before {
+    content: "";
+    display: inline-flex;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.75);
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.45);
+  }
+`;
+
+export const FormSection = styled.div`
+  padding: 3.5rem 3rem;
   display: flex;
-  gap: 30px;
-  align-items: center;
-  
-  @media (max-width: 768px) {
-    gap: 20px;
+  flex-direction: column;
+  gap: 2rem;
+  background: rgba(10, 10, 15, 0.72);
+
+  @media (max-width: 900px) {
+    padding: 3rem 2.25rem;
   }
 `;
 
-export const NavLink = styled(Link)`
-  color: rgba(255, 255, 255, 0.8);
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    color: white;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-  }
-  
-  @media (max-width: 768px) {
-    font-size: 12px;
-  }
+export const FormHeader = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
 `;
 
-export const NavButton = styled.button`
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: white;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    background: rgba(255, 255, 255, 0.25);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-  }
-  
-  @media (max-width: 768px) {
-    font-size: 12px;
-    padding: 6px 12px;
-  }
-`;
-export const SplineObjectWrapper = styled.div`
-  position: fixed;
-  inset: 0;
-  height: 100vh;
-  width: 100vw; 
-  z-index: 100;
-  pointer-events: none; /* Prevents interaction with the Spline object */
-  background-color: transparent;
-  will-change: transform, opacity; /* Improves performance during animations */
-`
-
-export const EffectDiv = styled.div`
-  position: absolute;
-  z-index: 300;
-  width: 200em;
-  height: 30em;
-  bottom:-30em;
-  transform: rotate(-23deg);
-  background: rgba(0, 0, 0, 0);
-  /* background-color:pink; */
-  
-  background: linear-gradient(180deg,rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 55%);
-  backdrop-filter: blur(6px);
+export const FormTitle = styled.h2`
+  margin: 0;
+  font-size: clamp(1.8rem, 2.4vw, 2.2rem);
+  font-weight: 600;
+  color: #ffffff;
 `;
 
-export const EffectEntire = styled.div`
-  position: absolute;
-  z-index: 200;
-  width: 100vw;
-  height: 100vh;
-  top:0;
-  left:0;
-  background: rgba(0, 0, 0, 0);
-  /* background-color:pink; */
-  background: radial-gradient(circle, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 110%);
-  /* backdrop-filter: blur(6px); */
+export const FormSubtitle = styled.p`
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.68);
 `;
 
 export const LoginForm = styled.form`
-  position: absolute;
-  z-index: 400;
-
-  width: 40em;
-  height: 80%;
-
-  top: -80%;
-
-  color: white;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(10px); /* 선택 */
-  background: rgba(22, 22, 22, 0.7); /* 반투명 배경 */
-  padding: 2rem;
-  border-radius: 1em;
-  text-shadow: 0 0 10px #eeeeee;
-
-  animation : movedown 1s 1.4s ease forwards;
-
-  @keyframes movedown {
-    to {
-      top:10%;
-    }
-  }
-  @media (max-width: 768px) {
-    width: 90%;
-    height: 80%;
-  }
+  gap: 1.2rem;
 `;
 
-export const ArrowBigLeftDash = styled(Link)`
-  z-index: 400;
-  position: absolute;
-  top: 6em;
-  left: 2em;
-
-  &:hover{
-    cursor: pointer;
-  }
-`;
-
-export const LogoImag = styled.div`
-  width: 80%;
-  height: 7em;
-  overflow: hidden;
-  
-  img{
-    width: 100%;
-    height: 100%;
-  }
-  @media (max-width: 768px) {
-    width: 90%;
-  }
-`
-
-export const InputWrapper = styled.div`
-  width: 100%;
-  height: fit-content;
-
-  margin-top: 3em;
-
+export const Field = styled.div`
   display: flex;
-  justify-content: center;
-  align-items: center;
   flex-direction: column;
+  gap: 0.55rem;
 `;
-export const Input = styled.div`
-  width: 70%;
-  height: 4vh;
+
+export const FieldLabel = styled.label`
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.65);
+`;
+
+export const InputControl = styled.input`
+  height: 48px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 0 1.05rem;
+  font-size: 0.95rem;
+  color: #ffffff;
+  background: rgba(8, 8, 10, 0.55);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: rgba(130, 108, 255, 0.85);
+    background: rgba(14, 14, 20, 0.9);
+    box-shadow: 0 0 0 3px rgba(130, 108, 255, 0.3);
+  }
+
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.38);
+  }
+`;
+
+export const Actions = styled.div`
   display: flex;
-  justify-content: center;
   flex-direction: column;
-
-  font-size: 1.2em;
-
-  margin-bottom: 8%;
-  @media (max-width: 768px) {
-    width: 90%;
-  }
-`;
-export const InputTag = styled.input`
-  padding: 0 2%;
-  margin: 0;
-  border: 0;
-  outline: 0;
-  width: 96%;
-  height: 100%;
-
-  font-size: 1em;
-  background-color: transparent;
-  color: ${({ equal }) => (equal ? "white" : "red")};
-
-  &:focus + label,
-  &:valid + label {
-    opacity: 1;
-    transform: translate(0, -120%);
-  }
-  &.error {
-    animation: shake 0.3s ease-in-out;
-    color: red;
-  }
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    50% { transform: translateX(5px); }
-    75% { transform: translateX(-5px); }
-  }
+  gap: 0.75rem;
+  margin-top: 0.25rem;
 `;
 
-export const Label = styled.label`
-  position: absolute;
-
-  padding: 0;
-  margin: 0%;
-
-  color: #eee;
-  opacity: 0.6;
-  transition: all ease 0.3s;
-`;
-export const UnderLine = styled.div`
-  width: 100%;
-  height: 2px;
-
-  margin-top: -2%;
-
-  background-color: white;
-
-  box-shadow: 0 2px 3px #999;
-`;
-export const LoginButtonWrapper = styled.div`
-  width: 100%;
-  height: auto;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-`;
 export const LoginButton = styled.button`
-  width: 70%;
-  height: 4vh;
-
-  margin-bottom: 1em;
-
-  background-color: #161616;
-  color: white;
-  text-shadow: 0 0 10px #eeeeee;
+  height: 52px;
+  border-radius: 14px;
   border: none;
-  border-radius: 0.5em;
-
-  font-size: 1em;
-
-  transition: box-shadow ease 1s, background-color ease 0.3s, color ease 0.3s, text-shadow ease 0.3s;
-
+  background: linear-gradient(135deg, #836cff, #5a4df1);
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 
   &:hover {
-    background-color: #f9f9f9;
-    color: #141414;
-    text-shadow: 0 0 10px #141414;
+    transform: translateY(-1px);
+    box-shadow: 0 16px 32px rgba(92, 77, 241, 0.35);
   }
-  @media (max-width: 768px) {
-    width: 90%;
+
+  &:active {
+    transform: translateY(0);
   }
 `;
-export const SplitLine = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
 
-  width: 80%;
-  hr{
-    width: 40%;
-    margin: 0 5%;
+export const Divider = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.9rem;
+
+  &::before,
+  &::after {
+    content: "";
+    flex: 1;
     height: 1px;
-    border: none;
-    background-color: #eee;
-    box-shadow: 0 2px 3px #999;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  }
+
+  span {
+    white-space: nowrap;
   }
 `;
-export const GoogleLoginButton = styled.div`
-  display: flex;
-  justify-content: center;
+
+export const GoogleLoginButton = styled.button`
+  display: inline-flex;
   align-items: center;
-  width: 70%;
-  height: 4vh;
-
-  margin-top: 2em;
-
-  background-color: #f5f5f5;
-  color: #000000;
-  border: none;
-  border-radius: 0.5em;
-
-  font-size: 1em;
-
-  transition: box-shadow ease 1s, background-color ease 0.3s, color ease 0.3s, text-shadow ease 0.3s;
-
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  height: 52px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(12, 12, 16, 0.55);
+  color: #ffffff;
+  font-size: 0.95rem;
   cursor: pointer;
-
-  &:hover {
-    background-color: #d9d9d9;
-    color: #141414;
-  }
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
 
   img {
-    height: 100%;
-    
-    aspect-ratio: 1 / 1;
-    margin-right: 0.5em;
+    height: 22px;
+    width: 22px;
+    object-fit: contain;
   }
-  @media (max-width: 768px) {
-    width: 90%;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.32);
+    background: rgba(18, 18, 24, 0.85);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 `;
 
+export const SignUpText = styled.p`
+  margin: 0;
+  margin-top: 0.5rem;
+  font-size: 0.92rem;
+  color: rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
 
-export const A = styled(Link)`
-  position: absolute;
-  bottom: 3em;
-  
-  color: #eee;
+export const SignUpLink = styled(Link)`
+  color: #9fa8ff;
+  font-weight: 600;
   text-decoration: none;
-  font-size: 1em;
-  margin-top: 1em;
-  transition: color ease 0.3s;
+  transition: color 0.2s ease;
 
   &:hover {
-    color: #d9d9d9;
+    color: #c7ceff;
     text-decoration: underline;
   }
 `;

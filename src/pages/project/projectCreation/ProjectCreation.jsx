@@ -63,6 +63,7 @@ export function ProjectCreation({ onCreateProject, onOpenProject }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [savedProjects, setSavedProjects] = useState([]);
   const [activeTab, setActiveTab] = useState("recent");
+  const [isCustomizationOpen, setIsCustomizationOpen] = useState(false);
   const {
     points,
     bookshelfTheme,
@@ -130,7 +131,8 @@ export function ProjectCreation({ onCreateProject, onOpenProject }) {
         return true;
       }
 
-      const haystack = `${template.name} ${template.description} ${template.methodology}`.toLowerCase();
+      const haystack =
+        `${template.name} ${template.description} ${template.methodology}`.toLowerCase();
       return haystack.includes(query);
     });
   }, [selectedMethodology, searchQuery]);
@@ -153,7 +155,6 @@ export function ProjectCreation({ onCreateProject, onOpenProject }) {
       : selectedMethodology === "code-para"
       ? "CODE/PARA"
       : "";
-
 
   const getBookThickness = (noteCount) => {
     const MIN_THICKNESS = 48;
@@ -272,6 +273,25 @@ export function ProjectCreation({ onCreateProject, onOpenProject }) {
                 </S.EmptyState>
               ) : (
                 <>
+                  <S.CustomizationCallout>
+                    <div>
+                      <S.CustomizationCalloutTitle>
+                        책장 꾸미기
+                      </S.CustomizationCalloutTitle>
+                      <S.CustomizationCalloutDescription>
+                        현재 프로젝트의 책장 테마를 변경하고 새로운 분위기를
+                        적용해 보세요.
+                      </S.CustomizationCalloutDescription>
+                    </div>
+                    <S.Button
+                      type="button"
+                      variant="primary"
+                      onClick={() => setIsCustomizationOpen(true)}
+                    >
+                      꾸미기 열기
+                    </S.Button>
+                  </S.CustomizationCallout>
+
                   <BookshelfSection
                     projects={savedProjects}
                     templates={templates}
@@ -285,6 +305,8 @@ export function ProjectCreation({ onCreateProject, onOpenProject }) {
                   />
 
                   <CustomizationPanel
+                    isOpen={isCustomizationOpen}
+                    onClose={() => setIsCustomizationOpen(false)}
                     points={points}
                     bookshelfOptions={bookshelfOptions}
                     bookshelfTheme={bookshelfTheme}
@@ -293,7 +315,7 @@ export function ProjectCreation({ onCreateProject, onOpenProject }) {
                   />
                 </>
               )}
-          </S.TabContent>
+            </S.TabContent>
 
             <S.TabContent active={activeTab === "new"}>
               <S.WizardCard>
@@ -309,10 +331,14 @@ export function ProjectCreation({ onCreateProject, onOpenProject }) {
 
                       return (
                         <S.StepItem key={step.id} $status={status}>
-                          <S.StepMarker $status={status}>{index + 1}</S.StepMarker>
+                          <S.StepMarker $status={status}>
+                            {index + 1}
+                          </S.StepMarker>
                           <S.StepInfo>
                             <S.StepTitle>{step.title}</S.StepTitle>
-                            <S.StepDescription>{step.description}</S.StepDescription>
+                            <S.StepDescription>
+                              {step.description}
+                            </S.StepDescription>
                           </S.StepInfo>
                         </S.StepItem>
                       );
@@ -326,8 +352,8 @@ export function ProjectCreation({ onCreateProject, onOpenProject }) {
                       <S.StepIntro>
                         <S.StepHeading>Choose your methodology</S.StepHeading>
                         <S.StepText>
-                          Select the framework that matches how you want to organize
-                          knowledge.
+                          Select the framework that matches how you want to
+                          organize knowledge.
                         </S.StepText>
                       </S.StepIntro>
 
@@ -344,13 +370,17 @@ export function ProjectCreation({ onCreateProject, onOpenProject }) {
                               <S.SelectionIcon>
                                 <Icon size={18} />
                               </S.SelectionIcon>
-                              <S.SelectionTitle>{option.title}</S.SelectionTitle>
+                              <S.SelectionTitle>
+                                {option.title}
+                              </S.SelectionTitle>
                               <S.SelectionDescription>
                                 {option.description}
                               </S.SelectionDescription>
                               <S.SelectionHighlights>
                                 {option.highlights.map((highlight) => (
-                                  <li key={`${option.id}-${highlight}`}>{highlight}</li>
+                                  <li key={`${option.id}-${highlight}`}>
+                                    {highlight}
+                                  </li>
                                 ))}
                               </S.SelectionHighlights>
                             </S.SelectionCard>
@@ -397,9 +427,12 @@ export function ProjectCreation({ onCreateProject, onOpenProject }) {
                                     <S.CardIconSection>
                                       <S.CardIcon>{template.icon}</S.CardIcon>
                                       <S.CardTitleSection>
-                                        <S.CardTitle>{template.name}</S.CardTitle>
+                                        <S.CardTitle>
+                                          {template.name}
+                                        </S.CardTitle>
                                         <S.Badge>
-                                          {template.methodology === "zettelkasten"
+                                          {template.methodology ===
+                                          "zettelkasten"
                                             ? "Zettelkasten"
                                             : "CODE/PARA"}
                                         </S.Badge>
@@ -428,7 +461,8 @@ export function ProjectCreation({ onCreateProject, onOpenProject }) {
                           </S.Grid>
                         ) : (
                           <S.StepEmpty>
-                            No templates match your search. Try a different keyword.
+                            No templates match your search. Try a different
+                            keyword.
                           </S.StepEmpty>
                         )
                       ) : (
@@ -444,7 +478,8 @@ export function ProjectCreation({ onCreateProject, onOpenProject }) {
                       <S.StepIntro>
                         <S.StepHeading>Project details</S.StepHeading>
                         <S.StepText>
-                          Name your project and review the template before creating it.
+                          Name your project and review the template before
+                          creating it.
                         </S.StepText>
                       </S.StepIntro>
 
@@ -462,21 +497,28 @@ export function ProjectCreation({ onCreateProject, onOpenProject }) {
                           <S.StepSummary>
                             <S.SummaryRow>
                               {methodologyLabel && (
-                                <S.SummaryBadge>{methodologyLabel}</S.SummaryBadge>
+                                <S.SummaryBadge>
+                                  {methodologyLabel}
+                                </S.SummaryBadge>
                               )}
                               <span>
-                                {selectedTemplate.features.length} key focus areas
+                                {selectedTemplate.features.length} key focus
+                                areas
                               </span>
                             </S.SummaryRow>
                             <S.FeaturesList>
                               {selectedTemplate.features.map((feature) => (
-                                <S.FeatureBadge key={feature}>{feature}</S.FeatureBadge>
+                                <S.FeatureBadge key={feature}>
+                                  {feature}
+                                </S.FeatureBadge>
                               ))}
                             </S.FeaturesList>
                           </S.StepSummary>
 
                           <S.InputGroup>
-                            <S.Label htmlFor="project-name">Project Name</S.Label>
+                            <S.Label htmlFor="project-name">
+                              Project Name
+                            </S.Label>
                             <S.Input
                               id="project-name"
                               placeholder="My Knowledge Base"
