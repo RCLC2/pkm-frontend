@@ -14,6 +14,7 @@ import { WelcomePage } from "./pages/project/dashboard/WelcomePage";
 import { EditorPage } from "./pages/project/editor/EditorPage";
 import { GraphPage } from "./pages/project/graph/GraphPage";
 import { ConversionPage } from "./pages/project/conversion/ConversionPage";
+import GoogleCallback from "./pages/auth/GoogleCallback";
 
 const App = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -40,6 +41,8 @@ const App = () => {
           <Route path="graph" element={<GraphPage />} />
           <Route path="convert" element={<ConversionPage />} />
         </Route>
+        <Route path="/auth/google/callback" element={<GoogleCallback />} />
+
         {/* Redirect old /dashboard route to new structure */}
         <Route
           path="/dashboard-old"
