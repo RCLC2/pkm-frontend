@@ -89,6 +89,34 @@ export const MetricValue = styled.span`
   font-weight: 600;
 `;
 
+export const FocusMetricButton = styled.button`
+  all: unset;
+  display: flex;
+  flex-direction: column;
+  gap: ${(props) => props.theme.spacing[1]};
+  min-width: 80px;
+  cursor: pointer;
+  color: ${(props) => props.theme.colors.foreground};
+  text-align: left;
+  transition: color 0.2s ease;
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.6;
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${(props) => props.theme.colors.accent};
+    outline-offset: 2px;
+    border-radius: ${(props) => props.theme.borderRadius.sm};
+  }
+
+  &:not(:disabled):hover ${MetricValue},
+  &:not(:disabled):focus-visible ${MetricValue} {
+    text-decoration: underline;
+  }
+`;
+
 export const Legend = styled.div`
   position: absolute;
   bottom: ${(props) => props.theme.spacing[4]};
@@ -171,6 +199,27 @@ export const SelectionName = styled.span`
   color: ${(props) => props.theme.colors.foreground};
 `;
 
+export const SelectionNameButton = styled.button`
+  all: unset;
+  font-size: ${(props) => props.theme.fontSizes.lg};
+  font-weight: 600;
+  color: ${(props) => props.theme.colors.foreground};
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.2s ease;
+
+  &:focus-visible {
+    outline: 2px solid ${(props) => props.theme.colors.accent};
+    outline-offset: 2px;
+    border-radius: ${(props) => props.theme.borderRadius.sm};
+  }
+
+  &:hover,
+  &:focus-visible {
+    text-decoration: underline;
+  }
+`;
+
 export const SelectionMeta = styled.div`
   display: flex;
   flex-direction: column;
@@ -217,4 +266,51 @@ export const SelectionHint = styled.span`
   font-size: ${(props) => props.theme.fontSizes.xs};
   color: ${(props) => props.theme.colors.mutedForeground};
   line-height: 1.5;
+`;
+
+export const EmptyState = styled.div`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: ${(props) => props.theme.spacing[4]};
+  text-align: center;
+  padding: ${(props) => props.theme.spacing[8]};
+  background: radial-gradient(
+    120% 120% at 50% 0%,
+    ${(props) => `${props.theme.colors.accent}22`} 0%,
+    transparent 70%
+  );
+`;
+
+export const EmptyStateBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: ${(props) => props.theme.spacing[1]};
+  padding: ${(props) => props.theme.spacing[1]}
+    ${(props) => props.theme.spacing[3]};
+  font-size: ${(props) => props.theme.fontSizes.xs};
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  border-radius: 9999px;
+  color: ${(props) => props.theme.colors.accentForeground};
+  background-color: ${(props) => `${props.theme.colors.accent}1f`};
+  border: 1px solid ${(props) => `${props.theme.colors.accent}40`};
+`;
+
+export const EmptyStateTitle = styled.h3`
+  margin: 0;
+  font-size: ${(props) => props.theme.fontSizes["2xl"]};
+  font-weight: 600;
+  color: ${(props) => props.theme.colors.foreground};
+`;
+
+export const EmptyStateDescription = styled.p`
+  margin: 0;
+  font-size: ${(props) => props.theme.fontSizes.sm};
+  line-height: 1.6;
+  color: ${(props) => props.theme.colors.mutedForeground};
+  max-width: 420px;
 `;

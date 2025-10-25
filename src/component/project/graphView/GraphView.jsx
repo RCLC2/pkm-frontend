@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ThemeProvider } from "styled-components";
 import { ZoomIn, ZoomOut, Maximize, RotateCcw } from "lucide-react";
 import { theme } from "../../../styled/thema";
@@ -510,7 +510,8 @@ function drawGraph(ctx, canvas, graph, view, highlight) {
     const isNeighbor =
       (selectedNeighbors && selectedNeighbors.has(node.id)) ||
       (hoveredNeighbors && hoveredNeighbors.has(node.id));
-    const shouldDim = (selectedId || hoveredId) && !(isSelected || isHovered || isNeighbor);
+    const shouldDim =
+      (selectedId || hoveredId) && !(isSelected || isHovered || isNeighbor);
 
     const intensity = isSelected ? 2 : isHovered || isNeighbor ? 1 : 0;
     const palette = getNodePalette(node, intensity);
@@ -535,7 +536,9 @@ function drawGraph(ctx, canvas, graph, view, highlight) {
 
     const renderLabel = (text, offsetY, options = {}) => {
       ctx.save();
-      ctx.font = `${options.weight || 500} ${options.size || 12}px 'Inter', sans-serif`;
+      ctx.font = `${options.weight || 500} ${
+        options.size || 12
+      }px 'Inter', sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       const paddingX = options.paddingX || 12;
@@ -564,7 +567,12 @@ function drawGraph(ctx, canvas, graph, view, highlight) {
     const subtitleOffset = node.y + radius + 18;
 
     if (isSelected || isHovered) {
-      renderLabel(node.title, titleOffset, { size: 12, radius: 12, paddingX: 12, paddingY: 6 });
+      renderLabel(node.title, titleOffset, {
+        size: 12,
+        radius: 12,
+        paddingX: 12,
+        paddingY: 6,
+      });
     }
 
     if (node.filename) {
@@ -590,11 +598,16 @@ function screenToWorld(x, y, view) {
   };
 }
 
-function GraphViewInner({ methodology = "zettelkasten" }) {
+function GraphViewInner({ methodology = "zettelkasten", onNavigateToNote }) {
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
   const ctxRef = useRef(null);
-  const graphRef = useRef({ nodes: [], edges: [], nodeMap: new Map(), adjacency: new Map() });
+  const graphRef = useRef({
+    nodes: [],
+    edges: [],
+    nodeMap: new Map(),
+    adjacency: new Map(),
+  });
   const viewRef = useRef({
     scale: 0.9,
     offsetX: 0,
@@ -718,7 +731,11 @@ function GraphViewInner({ methodology = "zettelkasten" }) {
 
       if (graphWidth === 0 || graphHeight === 0) return;
 
-      const scale = clamp(Math.min(width / graphWidth, height / graphHeight), 0.45, 1.8);
+      const scale = clamp(
+        Math.min(width / graphWidth, height / graphHeight),
+        0.45,
+        1.8
+      );
       view.scale = scale;
       view.offsetX = width / 2 - ((minX + maxX) / 2) * scale;
       view.offsetY = height / 2 - ((minY + maxY) / 2) * scale;
@@ -734,7 +751,12 @@ function GraphViewInner({ methodology = "zettelkasten" }) {
       setLinkSourceState(null);
       setTooltipState(null);
       setActiveTypes([...new Set(graph.nodes.map((node) => node.type))]);
-      setStats((prev) => ({ ...prev, nodes: graph.nodes.length, edges: graph.edges.length, focus: "전체" }));
+      setStats((prev) => ({
+        ...prev,
+        nodes: graph.nodes.length,
+        edges: graph.edges.length,
+        focus: "전체",
+      }));
 
       if (refit) {
         updateViewToFit();
@@ -822,7 +844,9 @@ function GraphViewInner({ methodology = "zettelkasten" }) {
 
       highlightRef.current.selectedId = node.id;
       view.selectedNodeId = node.id;
-      const neighborIds = Array.from(graphRef.current.adjacency.get(node.id) || []);
+      const neighborIds = Array.from(
+        graphRef.current.adjacency.get(node.id) || []
+      );
       const neighbors = neighborIds
         .map((id) => graphRef.current.nodeMap.get(id))
         .filter(Boolean);
@@ -997,7 +1021,11 @@ function GraphViewInner({ methodology = "zettelkasten" }) {
         } else {
           setTooltipState(null);
         }
-      } else if (node && tooltipRef.current && tooltipRef.current.id === node.id) {
+      } else if (
+        node &&
+        tooltipRef.current &&
+        tooltipRef.current.id === node.id
+      ) {
         setTooltipState({
           ...tooltipRef.current,
           x: event.offsetX,
@@ -1018,8 +1046,8 @@ function GraphViewInner({ methodology = "zettelkasten" }) {
       view.pointerMoved = false;
       view.lastX = event.clientX;
       view.lastY = event.clientY;
-       view.startX = event.clientX;
-       view.startY = event.clientY;
+      view.startX = event.clientX;
+      view.startY = event.clientY;
       view.dragCanvas = false;
       view.draggedNodeId = null;
 
@@ -1211,7 +1239,11 @@ function GraphViewInner({ methodology = "zettelkasten" }) {
     const graphWidth = maxX - minX + padding;
     const graphHeight = maxY - minY + padding;
 
-    const scale = clamp(Math.min(width / graphWidth, height / graphHeight), 0.45, 1.8);
+    const scale = clamp(
+      Math.min(width / graphWidth, height / graphHeight),
+      0.45,
+      1.8
+    );
     view.scale = scale;
     view.offsetX = width / 2 - ((minX + maxX) / 2) * scale;
     view.offsetY = height / 2 - ((minY + maxY) / 2) * scale;
@@ -1238,7 +1270,11 @@ function GraphViewInner({ methodology = "zettelkasten" }) {
 
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
-    const targetScale = clamp(view.scale < 1 ? 1.2 : view.scale * 1.1, 0.6, 2.4);
+    const targetScale = clamp(
+      view.scale < 1 ? 1.2 : view.scale * 1.1,
+      0.6,
+      2.4
+    );
     view.scale = targetScale;
     view.offsetX = width / 2 - node.x * targetScale;
     view.offsetY = height / 2 - node.y * targetScale;
@@ -1252,17 +1288,33 @@ function GraphViewInner({ methodology = "zettelkasten" }) {
     }
   };
 
+  const handleOpenSelection = useCallback(() => {
+    if (!selection || !onNavigateToNote) return;
+    onNavigateToNote(selection.id);
+  }, [selection, onNavigateToNote]);
+
+  const canOpenSelection = Boolean(selection && onNavigateToNote);
+
   return (
     <ThemeProvider theme={theme}>
       <S.GraphContainer>
         <S.Controls>
-          <S.ControlButton onClick={() => handleZoom("in")} aria-label="그래프 확대">
+          <S.ControlButton
+            onClick={() => handleZoom("in")}
+            aria-label="그래프 확대"
+          >
             <ZoomIn size={16} />
           </S.ControlButton>
-          <S.ControlButton onClick={() => handleZoom("out")} aria-label="그래프 축소">
+          <S.ControlButton
+            onClick={() => handleZoom("out")}
+            aria-label="그래프 축소"
+          >
             <ZoomOut size={16} />
           </S.ControlButton>
-          <S.ControlButton onClick={handleFocusSelection} aria-label="선택 노드로 이동">
+          <S.ControlButton
+            onClick={handleFocusSelection}
+            aria-label="선택 노드로 이동"
+          >
             <Maximize size={16} />
           </S.ControlButton>
           <S.ControlButton onClick={handleResetView} aria-label="그래프 초기화">
@@ -1280,10 +1332,22 @@ function GraphViewInner({ methodology = "zettelkasten" }) {
               <S.MetricLabel>Links</S.MetricLabel>
               <S.MetricValue>{stats.edges}</S.MetricValue>
             </S.MetricItem>
-            <S.MetricItem>
-              <S.MetricLabel>Focus</S.MetricLabel>
-              <S.MetricValue>{stats.focus}</S.MetricValue>
-            </S.MetricItem>
+            {canOpenSelection ? (
+              <S.FocusMetricButton
+                type="button"
+                onClick={handleOpenSelection}
+                aria-label={`${selection?.title ?? stats.focus} 문서로 이동`}
+                title={`${selection?.title ?? stats.focus} 문서로 이동`}
+              >
+                <S.MetricLabel>Focus</S.MetricLabel>
+                <S.MetricValue>{stats.focus}</S.MetricValue>
+              </S.FocusMetricButton>
+            ) : (
+              <S.MetricItem>
+                <S.MetricLabel>Focus</S.MetricLabel>
+                <S.MetricValue>{stats.focus}</S.MetricValue>
+              </S.MetricItem>
+            )}
           </S.MetricsPanel>
         </S.Hud>
 
@@ -1291,11 +1355,23 @@ function GraphViewInner({ methodology = "zettelkasten" }) {
           <S.SelectionTitle>Focused Node</S.SelectionTitle>
           {selection ? (
             <>
-              <S.SelectionName>{selection.title}</S.SelectionName>
+              {canOpenSelection ? (
+                <S.SelectionNameButton
+                  type="button"
+                  onClick={handleOpenSelection}
+                  title={`${selection.title} 문서로 이동`}
+                >
+                  {selection.title}
+                </S.SelectionNameButton>
+              ) : (
+                <S.SelectionName>{selection.title}</S.SelectionName>
+              )}
               <S.SelectionTags>
                 <S.SelectionTag>{selection.type}</S.SelectionTag>
                 {selection.tags.map((tag) => (
-                  <S.SelectionTag key={`${selection.id}-${tag}`}>#{tag}</S.SelectionTag>
+                  <S.SelectionTag key={`${selection.id}-${tag}`}>
+                    #{tag}
+                  </S.SelectionTag>
                 ))}
               </S.SelectionTags>
               <S.SelectionMeta>
@@ -1305,7 +1381,9 @@ function GraphViewInner({ methodology = "zettelkasten" }) {
               {selection.neighbors.length > 0 && (
                 <S.SelectionTags>
                   {selection.neighbors.map((neighbor) => (
-                    <S.SelectionTag key={`${selection.id}-neighbor-${neighbor.id}`}>
+                    <S.SelectionTag
+                      key={`${selection.id}-neighbor-${neighbor.id}`}
+                    >
                       {neighbor.title}
                     </S.SelectionTag>
                   ))}
@@ -1313,19 +1391,22 @@ function GraphViewInner({ methodology = "zettelkasten" }) {
               )}
               {linkSourceId === selection.id ? (
                 <S.SelectionHint>
-                  선택된 노드를 출발점으로 설정했습니다. 연결할 다른 노드를 선택하면
-                  백링크가 생성됩니다.
+                  선택된 노드를 출발점으로 설정했습니다. 연결할 다른 노드를
+                  선택하면 백링크가 생성됩니다.
                 </S.SelectionHint>
               ) : (
                 <S.SelectionHint>
-                  노드를 두 번 클릭하면 링크 모드를 종료할 수 있고, 링크 선을 클릭하면
-                  백링크가 제거됩니다.
+                  노드를 두 번 클릭하면 링크 모드를 종료할 수 있고, 링크 선을
+                  클릭하면 백링크가 제거됩니다.
                 </S.SelectionHint>
               )}
             </>
           ) : (
             <S.SelectionMeta>
-              <span>노드를 클릭해 구조를 탐색하고, 다른 노드를 이어서 백링크를 추가하세요.</span>
+              <span>
+                노드를 클릭해 구조를 탐색하고, 다른 노드를 이어서 백링크를
+                추가하세요.
+              </span>
             </S.SelectionMeta>
           )}
         </S.SelectionPanel>
@@ -1336,7 +1417,10 @@ function GraphViewInner({ methodology = "zettelkasten" }) {
           <S.LegendTitle>Legend</S.LegendTitle>
           <S.LegendItems>
             {activeTypes.map((type, index) => {
-              const shade = getNodePalette({ degree: Math.min(10, index * 2 + 2) }, 0).fill;
+              const shade = getNodePalette(
+                { degree: Math.min(10, index * 2 + 2) },
+                0
+              ).fill;
               return (
                 <S.LegendItem key={type}>
                   <S.LegendIcon round color={shade} />
@@ -1362,10 +1446,29 @@ function GraphViewInner({ methodology = "zettelkasten" }) {
   );
 }
 
-export function GraphView({ methodology = "zettelkasten" }) {
+export function GraphView({ methodology = "zettelkasten", onNavigateToNote }) {
   if (methodology !== "zettelkasten") {
-    return null;
+    return (
+      <ThemeProvider theme={theme}>
+        <S.GraphContainer>
+          <S.EmptyState>
+            <S.EmptyStateBadge>Not support!</S.EmptyStateBadge>
+            <S.EmptyStateTitle>
+              CODE/PARA 모드에서는 그래프를 지원하지 않습니다.
+            </S.EmptyStateTitle>
+            <S.EmptyStateDescription>
+              Zettelkasten 방법론에서만 네트워크 그래프를 제공하고 있습니다.
+            </S.EmptyStateDescription>
+          </S.EmptyState>
+        </S.GraphContainer>
+      </ThemeProvider>
+    );
   }
 
-  return <GraphViewInner methodology={methodology} />;
+  return (
+    <GraphViewInner
+      methodology={methodology}
+      onNavigateToNote={onNavigateToNote}
+    />
+  );
 }

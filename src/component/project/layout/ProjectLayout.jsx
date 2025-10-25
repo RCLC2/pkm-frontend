@@ -158,7 +158,14 @@ export function ProjectLayout() {
           </S.MainHeader>
 
           <S.ContentArea>
-            <Outlet context={{ activeNote, methodology, currentProject }} />
+            <Outlet
+              context={{
+                activeNote,
+                methodology,
+                currentProject,
+                onNavigateToNote: handleNoteSelect,
+              }}
+            />
           </S.ContentArea>
         </S.MainContent>
       </S.AppContainer>
