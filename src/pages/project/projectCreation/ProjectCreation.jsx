@@ -19,6 +19,7 @@ import { templates, bookColors } from "./constants/templates.jsx";
 import { useBookshelfCustomization } from "./hooks/useBookshelfCustomization";
 import { BookshelfSection } from "./components/bookshelf/BookshelfSection";
 import { CustomizationPanel } from "./components/customization/CustomizationPanel";
+import { useCreateWorkspace } from "../../../hooks/workspace/useCreateWorkspace.jsx";
 
 const wizardSteps = [
   {
@@ -55,15 +56,22 @@ const methodologyOptions = [
   },
 ];
 
-export function ProjectCreation({ onCreateProject, onOpenProject }) {
+export function ProjectCreation({
+  onCreateProject,
+  onOpenProject,
+  projects = [],
+}) {
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedMethodology, setSelectedMethodology] = useState(null);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [projectName, setProjectName] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [savedProjects, setSavedProjects] = useState([]);
+  const [savedProjects, setSavedProjects] = useState(projects);
   const [activeTab, setActiveTab] = useState("recent");
   const [isCustomizationOpen, setIsCustomizationOpen] = useState(false);
+
+  const { mutate } = useCreateWorkspace();
+
   const {
     points,
     bookshelfTheme,
@@ -74,11 +82,8 @@ export function ProjectCreation({ onCreateProject, onOpenProject }) {
   } = useBookshelfCustomization();
 
   useEffect(() => {
-    const saved = localStorage.getItem("knowledgebase-projects");
-    if (saved) {
-      setSavedProjects(JSON.parse(saved));
-    }
-  }, []);
+    setSavedProjects(projects);
+  }, [projects]);
 
   useEffect(() => {
     setSelectedTemplate((prev) =>
@@ -96,12 +101,8 @@ export function ProjectCreation({ onCreateProject, onOpenProject }) {
   }, [selectedTemplate]);
 
   const handleDeleteProject = (projectId) => {
-    const updatedProjects = savedProjects.filter((p) => p.id !== projectId);
-    setSavedProjects(updatedProjects);
-    localStorage.setItem(
-      "knowledgebase-projects",
-      JSON.stringify(updatedProjects)
-    );
+    const updated = savedProjects.filter((p) => p.id !== projectId);
+    setSavedProjects(updated);
   };
 
   const formatDate = (dateString) => {
@@ -186,7 +187,28 @@ export function ProjectCreation({ onCreateProject, onOpenProject }) {
   };
 
   const handleCreateProject = () => {
-    if (!selectedTemplate || !projectName.trim()) {
+    if (selectedTemplate && projectName.trim() && selectedMethodology) {
+      const type = selectedMethodology === "zettelkasten" ? "zettel" : "para";
+
+      const requestBody = {
+        name: projectName.trim(),
+        type,
+      };
+
+      mutate(requestBody, {
+        onSuccess: () => {
+          alert(`워크스페이스 '${projectName}' 생성 완료`);
+          setCurrentStep(0);
+          setSelectedMethodology(null);
+          setSelectedTemplate(null);
+          setProjectName("");
+          setSearchQuery("");
+          setActiveTab("recent");
+        },
+        onError: (err) => {
+          console.error("워크스페이스 생성 실패:", err);
+        },
+      });
       return;
     }
 

@@ -46,3 +46,8 @@ export const getNotesByIds = async (params) => {
   const res = await noteApi.get("/note/ids", { params });
   return res.data.data;
 };
+
+export const updateParaMapping = async (data) => {
+  const res = await noteApi.post("/note/para-mapping", data);
+  return res.data.data;
+};
