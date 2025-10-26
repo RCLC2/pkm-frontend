@@ -6,8 +6,14 @@ import { theme } from "../../../styled/thema";
 import * as S from "./SearchBarStyled";
 import { Search, Filter } from "lucide-react";
 
-export function SearchBar() {
+export function SearchBar({ onSearch }) {
   const [searchQuery, setSearchQuery] = useState("");
+
+  const handleChange = (e) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    onSearch(value);
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -19,7 +25,7 @@ export function SearchBar() {
           <S.SearchInput
             placeholder="Search notes, tags, content..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={handleChange}
           />
         </S.SearchInputContainer>
         <S.FilterButton>

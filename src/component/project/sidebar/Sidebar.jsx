@@ -15,8 +15,16 @@ import {
   Archive,
   Hash,
 } from "lucide-react";
+import { useGetRecentNotes } from "../../../hooks/note/useGetRecentNotes";
+import { useSearchNotesByKeyword } from "../../../hooks/note/useSearchNotesByKeyword";
 
-export function Sidebar({ activeNote, onNoteSelect, methodology }) {
+export function Sidebar({
+  activeNote,
+  onNoteSelect,
+  methodology,
+  workspaceId,
+  searchKeyword,
+}) {
   const getInitialSections = () => {
     return methodology === "zettelkasten"
       ? ["zettelkasten"]
@@ -32,6 +40,14 @@ export function Sidebar({ activeNote, onNoteSelect, methodology }) {
         : [...prev, section]
     );
   };
+
+  const { data: recentNotes = [] } = useGetRecentNotes({ workspaceId });
+  const { data: searchResults = [] } = useSearchNotesByKeyword({
+    workspaceId,
+    keyword: searchKeyword,
+  });
+
+  const displayedNotes = searchKeyword ? searchResults : recentNotes;
 
   const renderNoteList = (notes) => (
     <S.NotesList>
@@ -64,7 +80,7 @@ export function Sidebar({ activeNote, onNoteSelect, methodology }) {
           key: "zettelkasten",
           title: "Zettelkasten",
           icon: Hash,
-          notes: sidebarMockNotes.zettelkasten,
+          notes: displayedNotes,
         },
       ];
     } else {

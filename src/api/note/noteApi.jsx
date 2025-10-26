@@ -3,8 +3,8 @@ import { api } from "../axiosInterceptApi";
 const noteApi = api("note");
 
 // 노트 생성
-export const createNote = async () => {
-  const res = await noteApi.post(`/note/create`);
+export const createNote = async (data) => {
+  const res = await noteApi.post(`/note/create`, data);
   return res.data.data;
 };
 

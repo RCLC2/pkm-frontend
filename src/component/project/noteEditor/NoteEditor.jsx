@@ -3,41 +3,92 @@ import { useYorkieEditor } from "../../yorkie/YorkieProvider";
 import { useState, useEffect } from "react";
 import { ThemeProvider } from "styled-components";
 import { theme } from "../../../styled/thema";
-import { noteEditorMockContent } from "../../../mocks/component/project/noteEditorMock";
 import * as S from "./NoteEditorStyled";
 import TiptapEditor from "../editor/TiptapEditor";
-import { Save, Tag, Calendar, FileText } from "lucide-react";
+import { Save, Tag, Calendar, FileText, Trash2, Plus } from "lucide-react";
+import { useGetNoteById } from "../../../hooks/note/useGetNoteById";
+import { useUpdateNote } from "../../../hooks/note/useUpdateNote";
+import { useDeleteNote } from "../../../hooks/note/useDeleteNote";
 
 export function NoteEditor({ noteId }) {
   const { doc } = useYorkieEditor(noteId);
+
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [tags, setTags] = useState([]);
   const [newTag, setNewTag] = useState("");
 
+  // 노트 단일 조회
+  const { data: note, isLoading } = useGetNoteById(noteId);
+
+  const updateMutation = useUpdateNote();
+  const deleteMutation = useDeleteNote();
+
   useEffect(() => {
-    if (noteId && noteEditorMockContent[noteId]) {
-      const note = noteEditorMockContent[noteId];
-      setTitle(note.title);
-      setContent(note.content);
-      setTags(note.tags);
+    if (note) {
+      setTitle(note.title || "");
+      setContent(note.contents || "");
+      setTags(note.tags || []);
     } else {
       setTitle("");
       setContent("");
       setTags([]);
     }
-  }, [noteId]);
+  }, [note]);
 
+  // 수정
+  const handleSave = () => {
+    if (!noteId) return alert("노트를 먼저 선택하세요.");
+    updateMutation.mutate(
+      {
+        id: noteId,
+        workspaceId: note.workspaceId,
+        title,
+        description: title,
+        contents: content,
+      },
+      {
+        onSuccess: () => alert("저장 완료"),
+        onError: () => alert("저장 실패"),
+      }
+    );
+  };
+
+  // 삭제
+  const handleDelete = () => {
+    if (!noteId) return alert("삭제할 노트를 선택하세요.");
+    if (confirm("정말 이 노트를 삭제하시겠습니까?")) {
+      deleteMutation.mutate(noteId, {
+        onSuccess: () => alert("노트가 삭제되었습니다."),
+        onError: () => alert("삭제 실패"),
+      });
+    }
+  };
+
+  // 태그 추가/삭제
   const addTag = () => {
     if (newTag && !tags.includes(newTag)) {
       setTags([...tags, newTag.startsWith("#") ? newTag : `#${newTag}`]);
       setNewTag("");
     }
   };
-
   const removeTag = (tagToRemove) => {
     setTags(tags.filter((tag) => tag !== tagToRemove));
   };
+
+  // 로딩 상태
+  // 로딩 상태
+  if (isLoading) {
+    return (
+      <ThemeProvider theme={theme}>
+        <S.EmptyState>
+          <S.EmptyStateContent>
+            <S.Spinner />
+          </S.EmptyStateContent>
+        </S.EmptyState>
+      </ThemeProvider>
+    );
+  }
 
   if (!noteId) {
     return (
@@ -47,7 +98,7 @@ export function NoteEditor({ noteId }) {
             <S.EmptyStateIcon>
               <FileText size={48} />
             </S.EmptyStateIcon>
-            <p>Select a note to start editing</p>
+            <p>Select or create a note to start editing</p>
           </S.EmptyStateContent>
         </S.EmptyState>
       </ThemeProvider>
@@ -59,10 +110,14 @@ export function NoteEditor({ noteId }) {
       <S.EditorContainer>
         <S.Toolbar>
           <S.ToolbarButtons>
-            <S.SaveButton>
+            <S.SaveButton onClick={handleSave}>
               <Save size={16} />
               Save
             </S.SaveButton>
+            <S.DeleteButton onClick={handleDelete}>
+              <Trash2 size={16} />
+              Delete
+            </S.DeleteButton>
           </S.ToolbarButtons>
 
           <S.TagsContainer>
@@ -94,7 +149,6 @@ export function NoteEditor({ noteId }) {
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Note title..."
           />
-
           <TiptapEditor
             content={content}
             onChange={setContent}
@@ -104,11 +158,11 @@ export function NoteEditor({ noteId }) {
           <S.Metadata>
             <S.MetadataItem>
               <Calendar size={12} />
-              Created: Jan 15, 2024
+              Created: {note?.createdAt || "N/A"}
             </S.MetadataItem>
             <S.MetadataItem>
               <Calendar size={12} />
-              Modified: Jan 18, 2024
+              Modified: {note?.updatedAt || "N/A"}
             </S.MetadataItem>
           </S.Metadata>
         </S.EditorContent>

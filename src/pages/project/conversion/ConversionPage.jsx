@@ -106,8 +106,7 @@ export function ConversionPage() {
   }, [assignments, zettelkastenNotes]);
 
   const unassignedNotes = useMemo(
-    () =>
-      zettelkastenNotes.filter((note) => !assignments[note.id]),
+    () => zettelkastenNotes.filter((note) => !assignments[note.id]),
     [assignments, zettelkastenNotes]
   );
 
@@ -152,7 +151,9 @@ export function ConversionPage() {
       setStatusVariant("warning");
       const remaining = unassignedNotes.length;
       const noun = remaining === 1 ? "note" : "notes";
-      setStatusMessage(`Assign ${remaining} more ${noun} to complete the mapping.`);
+      setStatusMessage(
+        `Assign ${remaining} more ${noun} to complete the mapping.`
+      );
       return;
     }
 
@@ -181,11 +182,13 @@ export function ConversionPage() {
             <Info size={18} />
           </S.BannerIconSlot>
           <S.BannerText>
-            <S.BannerTitle>Convert atomic notes into PARA structure</S.BannerTitle>
+            <S.BannerTitle>
+              Convert atomic notes into PARA structure
+            </S.BannerTitle>
             <S.BannerDescription>
-              Select a Zettelkasten note, then click one of the PARA quadrants to
-              place it. Each quadrant represents a workspace so you can review
-              and adjust before committing the conversion.
+              Select a Zettelkasten note, then click one of the PARA quadrants
+              to place it. Each quadrant represents a workspace so you can
+              review and adjust before committing the conversion.
             </S.BannerDescription>
           </S.BannerText>
         </S.InfoBanner>
@@ -261,7 +264,8 @@ export function ConversionPage() {
               {paraCategories.map((category) => {
                 const Icon = category.icon;
                 const assignedNotes = groupedAssignments[category.id];
-                const isTarget = assignments[activeNoteId || ""] === category.id;
+                const isTarget =
+                  assignments[activeNoteId || ""] === category.id;
 
                 return (
                   <S.Quadrant
@@ -329,7 +333,7 @@ export function ConversionPage() {
               </S.UnassignedInfo>
             </S.ActionsRow>
             <S.HintText>
-              Need a reset? {" "}
+              Need a reset?{" "}
               <S.ResetButton onClick={resetAssignments}>
                 Clear assignments
               </S.ResetButton>
