@@ -4,7 +4,10 @@ import { useOutletContext } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ThemeProvider } from "styled-components";
 import { theme } from "../../../styled/thema";
-import { getProjectStats, formatDate } from "../../../mocks/hooks/project/savedProjects";
+import {
+  getProjectStats,
+  formatDate,
+} from "../../../mocks/hooks/project/savedProjects";
 import { welcomePageMockRecentActivity } from "../../../mocks/component/project/welcomePageMock";
 import * as S from "./WelcomePageStyled";
 import {
@@ -17,12 +20,60 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
+import { useCreateNote } from "../../../hooks/note/useCreateNote";
+import ParaCategoryModal from "./ParaCategoryModal"; // 모달 컴포넌트 import
 
 export function WelcomePage() {
   const { methodology, currentProject } = useOutletContext();
   const [stats, setStats] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false); // 모달 상태 추가
   const isZettelkasten = methodology === "zettelkasten";
+  const createNoteMutation = useCreateNote();
+
+  const handleCreateNote = (paraCategory = null) => {
+    if (!currentProject?.id) {
+      alert("워크스페이스 ID가 없습니다.");
+      return;
+    }
+
+    const noteData = {
+      workspaceId: currentProject.id,
+      title: "새 노트",
+      description: "",
+      contents: "",
+    };
+
+    // PARA 방법론인 경우 카테고리 추가
+    if (paraCategory) {
+      noteData.paraCategory = paraCategory;
+    }
+
+    createNoteMutation.mutate(noteData, {
+      onSuccess: (data) => {
+        alert(`노트가 생성되었습니다: ${data.title}`);
+        // ✅ 필요하다면 생성된 noteId로 페이지 이동도 가능
+        // navigate(`/note/${data.id}`);
+      },
+      onError: () => {
+        alert("노트 생성 실패");
+      },
+    });
+  };
+
+  const handleQuickActionClick = () => {
+    if (isZettelkasten) {
+      // 제텔카스텐: 바로 노트 생성
+      handleCreateNote();
+    } else {
+      // PARA: 모달 열기
+      setIsModalOpen(true);
+    }
+  };
+
+  const handleCategorySelect = (category) => {
+    handleCreateNote(category);
+  };
 
   useEffect(() => {
     // Load stats from saved projects
@@ -77,13 +128,15 @@ export function WelcomePage() {
         <S.SectionTitle>Quick Actions</S.SectionTitle>
       </S.SectionHeader>
       <S.QuickActions>
-        <S.ActionCard>
+        <S.ActionCard onClick={handleQuickActionClick}>
           <S.ActionIcon>
             <Plus size={20} />
           </S.ActionIcon>
           <S.ActionContent>
             <S.ActionTitle>Create New Note</S.ActionTitle>
-            <S.ActionDescription>Start writing a new atomic note</S.ActionDescription>
+            <S.ActionDescription>
+              Start writing a new atomic note
+            </S.ActionDescription>
           </S.ActionContent>
         </S.ActionCard>
         <S.ActionCard>
@@ -92,7 +145,9 @@ export function WelcomePage() {
           </S.ActionIcon>
           <S.ActionContent>
             <S.ActionTitle>Explore Graph</S.ActionTitle>
-            <S.ActionDescription>Visualize note connections</S.ActionDescription>
+            <S.ActionDescription>
+              Visualize note connections
+            </S.ActionDescription>
           </S.ActionContent>
         </S.ActionCard>
         <S.ActionCard>
@@ -101,7 +156,9 @@ export function WelcomePage() {
           </S.ActionIcon>
           <S.ActionContent>
             <S.ActionTitle>Browse Notes</S.ActionTitle>
-            <S.ActionDescription>Explore your knowledge base</S.ActionDescription>
+            <S.ActionDescription>
+              Explore your knowledge base
+            </S.ActionDescription>
           </S.ActionContent>
         </S.ActionCard>
       </S.QuickActions>
@@ -159,12 +216,15 @@ export function WelcomePage() {
                             <Network size={16} />
                           )}
                           {activity.type === "tag" && <Tag size={16} />}
-                          {activity.type === "project" && <BookOpen size={16} />}
+                          {activity.type === "project" && (
+                            <BookOpen size={16} />
+                          )}
                         </S.ActivityIcon>
                         <S.ActivityContent>
                           <S.ActivityTitle>{activity.title}</S.ActivityTitle>
                           <S.ActivityMeta>
-                            {activity.projectName && `${activity.projectName} • `}
+                            {activity.projectName &&
+                              `${activity.projectName} • `}
                             {activity.action} • {activity.time}
                           </S.ActivityMeta>
                         </S.ActivityContent>
@@ -186,13 +246,20 @@ export function WelcomePage() {
                           </S.ActivityMeta>
                         </S.ActivityContent>
                       </S.ActivityItem>
-                  ))}
-            </S.ActivityList>
-          </S.Section>
+                    ))}
+              </S.ActivityList>
+            </S.Section>
 
             {quickActionsSection}
           </S.ContentGrid>
         )}
+
+        {/* PARA 카테고리 선택 모달 */}
+        <ParaCategoryModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSelect={handleCategorySelect}
+        />
       </S.WelcomeContainer>
     </ThemeProvider>
   );

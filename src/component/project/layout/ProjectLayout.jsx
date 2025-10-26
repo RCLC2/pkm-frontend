@@ -23,6 +23,7 @@ export function ProjectLayout() {
   const [currentProject, setCurrentProject] = useState(null);
   const [activeNote, setActiveNote] = useState("welcome-note");
   const [methodology, setMethodology] = useState("zettelkasten");
+  const [searchKeyword, setSearchKeyword] = useState("");
 
   // Get active view from current route
   const getActiveView = () => {
@@ -98,12 +99,14 @@ export function ProjectLayout() {
               </S.Select>
             </S.MethodologySelector>
 
-            <SearchBar />
+            <SearchBar onSearch={setSearchKeyword} />
           </S.SidebarHeader>
           <Sidebar
             activeNote={activeNote}
             onNoteSelect={handleNoteSelect}
             methodology={methodology}
+            workspaceId={currentProject?.workspaceId}
+            searchKeyword={searchKeyword}
           />
         </S.SidebarContainer>
 

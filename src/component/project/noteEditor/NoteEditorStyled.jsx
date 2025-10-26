@@ -206,6 +206,8 @@ export const EmptyState = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 100%;
+  min-height: 100vh;
   color: ${(props) => props.theme.colors.mutedForeground};
 `;
 
@@ -213,7 +215,40 @@ export const EmptyStateContent = styled.div`
   text-align: center;
 `;
 
-export const EmptyStateIcon = styled.div`
-  margin: 0 auto ${(props) => props.theme.spacing[4]} auto;
-  opacity: 0.5;
+export const DeleteButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: ${(props) => props.theme.spacing[2]};
+  padding: ${(props) => props.theme.spacing[2]}
+    ${(props) => props.theme.spacing[4]};
+  border: none;
+  background-color: ${(props) => props.theme.colors.destructive};
+  color: ${(props) => props.theme.colors.destructiveForeground};
+  border-radius: ${(props) => props.theme.borderRadius.md};
+  font-size: ${(props) => props.theme.fontSizes.sm};
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: ${(props) => props.theme.colors.destructive}e6;
+  }
+`;
+
+// 회전 스피너
+export const Spinner = styled.div`
+  width: 48px;
+  height: 48px;
+  border: 4px solid ${(props) => props.theme.colors.border};
+  border-top-color: ${(props) => props.theme.colors.primary};
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
 `;
