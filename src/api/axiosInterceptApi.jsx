@@ -6,7 +6,7 @@ const SERVICE_PATH_PREFIX = {
   graph: "/api/v1/graphs",
 };
 
-const GATEWAY_BASE_URL = "http://localhost:8000";
+const GATEWAY_BASE_URL = import.meta.env.GATEWAY_BASE_URL;
 
 export const api = (service) => {
   const prefix = SERVICE_PATH_PREFIX[service];
