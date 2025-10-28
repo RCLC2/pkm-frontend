@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { changeWorkspaceStyle } from "../../api/graph/workSpaceApi";
+import { changeWorkspaceStyle } from "../../api/graph/workspaceApi";
 
 export const useChangeWorkspaceStyle = () => {
   const queryClient = useQueryClient();

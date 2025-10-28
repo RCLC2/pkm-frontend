@@ -100,7 +100,6 @@ export function NoteEditor({ noteId }) {
   };
 
   // 로딩 상태
-  // 로딩 상태
   if (isLoading) {
     return (
       <ThemeProvider theme={theme}>

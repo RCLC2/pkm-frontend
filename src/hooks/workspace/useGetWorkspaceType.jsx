@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getWorkspaceType } from "../../api/graph/workSpaceApi";
+import { getWorkspaceType } from "../../api/graph/workspaceApi";
 
 export const useGetWorkspaceType = (workspaceId, userId) => {
   return useQuery({

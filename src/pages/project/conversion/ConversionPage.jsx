@@ -4,7 +4,6 @@ import { useOutletContext } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { ThemeProvider } from "styled-components";
 import { theme } from "../../../styled/thema";
-import { sidebarMockNotes } from "../../../mocks/component/project/sidebarMock";
 import * as S from "./ConversionPageStyled";
 import {
   ArrowRightLeft,
@@ -17,7 +16,10 @@ import {
   Archive,
   ListChecks,
 } from "lucide-react";
+import { useGetRecentNotes } from "../../../hooks/note/useGetRecentNotes";
+import { useUpdateParaMapping } from "../../../hooks/note/useUpdateParaMapping";
 
+// 변환 모드 옵션
 const conversionModes = [
   {
     id: "zettel-to-para",
@@ -33,6 +35,7 @@ const conversionModes = [
   },
 ];
 
+// PARA 카테고리 정의
 const paraCategories = [
   {
     id: "projects",
@@ -61,75 +64,74 @@ const paraCategories = [
 ];
 
 export function ConversionPage() {
-  const { methodology } = useOutletContext();
+  // ProjectLayout에서 context 받아오기
+  const { methodology, currentProject } = useOutletContext();
+  const workspaceId = currentProject?.id;
+
+  // react-query로 노트 데이터 가져오기
+  const { data: notes = [], isLoading } = useGetRecentNotes({ workspaceId });
+  const updateMapping = useUpdateParaMapping();
+
   const [mode, setMode] = useState("zettel-to-para");
-  const zettelkastenNotes = sidebarMockNotes.zettelkasten;
   const [activeNoteId, setActiveNoteId] = useState(null);
   const [assignments, setAssignments] = useState({});
   const [statusMessage, setStatusMessage] = useState("");
   const [statusVariant, setStatusVariant] = useState("warning");
 
+  // 첫 번째 노트를 자동 선택
   useEffect(() => {
-    if (!activeNoteId && zettelkastenNotes.length > 0) {
-      setActiveNoteId(zettelkastenNotes[0].id);
+    if (!activeNoteId && notes.length > 0) {
+      setActiveNoteId(notes[0].id);
     }
-  }, [activeNoteId, zettelkastenNotes]);
+  }, [activeNoteId, notes]);
 
+  // 현재 선택된 노트
   const activeNote = useMemo(
-    () => zettelkastenNotes.find((note) => note.id === activeNoteId) || null,
-    [activeNoteId, zettelkastenNotes]
+    () => notes.find((note) => note.id === activeNoteId) || null,
+    [activeNoteId, notes]
   );
 
-  const categoryLabelMap = useMemo(() => {
-    return paraCategories.reduce((acc, category) => {
-      acc[category.id] = category.label;
-      return acc;
-    }, {});
-  }, []);
+  // 카테고리 라벨 매핑
+  const categoryLabelMap = useMemo(
+    () => Object.fromEntries(paraCategories.map((c) => [c.id, c.label])),
+    []
+  );
 
+  // 카테고리별 배정된 노트
   const groupedAssignments = useMemo(() => {
-    const base = {
-      projects: [],
-      areas: [],
-      resources: [],
-      archive: [],
-    };
-
+    const base = { projects: [], areas: [], resources: [], archive: [] };
     Object.entries(assignments).forEach(([noteId, categoryId]) => {
-      const target = zettelkastenNotes.find((note) => note.id === noteId);
-      if (target && base[categoryId]) {
-        base[categoryId].push(target);
-      }
+      const target = notes.find((note) => note.id === noteId);
+      if (target && base[categoryId]) base[categoryId].push(target);
     });
-
     return base;
-  }, [assignments, zettelkastenNotes]);
+  }, [assignments, notes]);
 
+  // 미배정 노트 목록
   const unassignedNotes = useMemo(
-    () => zettelkastenNotes.filter((note) => !assignments[note.id]),
-    [assignments, zettelkastenNotes]
+    () => notes.filter((note) => !assignments[note.id]),
+    [assignments, notes]
   );
 
+  // 노트 선택
   const handleSelectNote = (noteId) => {
     setActiveNoteId(noteId);
     setStatusMessage("");
   };
 
+  // 카테고리 할당
   const handleAssignCategory = (categoryId) => {
     if (!activeNoteId) return;
-
     setAssignments((prev) => {
       const updated = { ...prev };
-      if (updated[activeNoteId] === categoryId) {
-        delete updated[activeNoteId];
-      } else {
-        updated[activeNoteId] = categoryId;
-      }
+      if (updated[activeNoteId] === categoryId) delete updated[activeNoteId];
+      else updated[activeNoteId] = categoryId;
       return updated;
     });
     setStatusMessage("");
   };
 
+  // 배정 해제
   const handleRemoveAssignment = (noteId) => {
     setAssignments((prev) => {
       const updated = { ...prev };
@@ -140,8 +142,9 @@ export function ConversionPage() {
     setStatusMessage("");
   };
 
+  // PARA 매핑 API 요청
   const handleFinalizeConversion = () => {
-    if (zettelkastenNotes.length === 0) {
+    if (notes.length === 0) {
       setStatusVariant("warning");
       setStatusMessage("No Zettelkasten notes available to convert.");
       return;
@@ -157,23 +160,50 @@ export function ConversionPage() {
       return;
     }
 
-    setStatusVariant("success");
-    setStatusMessage(
-      "All notes assigned. PARA workspace is ready for export or syncing."
-    );
+    const requestBody = {
+      workspaceId,
+      mappings: Object.entries(assignments).map(([noteId, paraCategory]) => ({
+        noteId,
+        paraCategory: paraCategory.toUpperCase(), //  Enum 형식
+      })),
+    };
+
+    updateMapping.mutate(requestBody, {
+      onSuccess: () => {
+        setStatusVariant("success");
+        setStatusMessage("PARA Mapping successfully saved!");
+      },
+      onError: (err) => {
+        console.error(err);
+        setStatusVariant("error");
+        setStatusMessage("Failed to save PARA mapping.");
+      },
+    });
   };
 
+  // 배정 초기화
   const resetAssignments = () => {
     setAssignments({});
     setStatusMessage("");
   };
 
+  // 로딩 상태
+  if (isLoading) {
+    return (
+      <S.EmptyState>
+        <Info size={18} />
+        Loading recent notes...
+      </S.EmptyState>
+    );
+  }
+
+  // Zettelkasten → PARA 화면
   const renderZettelkastenToPara = () => {
-    if (zettelkastenNotes.length === 0) {
+    if (notes.length === 0) {
       return <S.EmptyState>No Zettelkasten notes found.</S.EmptyState>;
     }
 
-    const assignedCount = zettelkastenNotes.length - unassignedNotes.length;
+    const assignedCount = notes.length - unassignedNotes.length;
 
     return (
       <>
@@ -198,12 +228,12 @@ export function ConversionPage() {
             <S.NoteColumnHeader>
               <S.NoteColumnTitle>Zettelkasten Notes</S.NoteColumnTitle>
               <S.NoteCount>
-                {assignedCount}/{zettelkastenNotes.length} assigned
+                {assignedCount}/{notes.length} assigned
               </S.NoteCount>
             </S.NoteColumnHeader>
 
             <S.NoteList>
-              {zettelkastenNotes.map((note) => {
+              {notes.map((note) => {
                 const assignedCategory = assignments[note.id];
                 return (
                   <S.NoteItem
@@ -221,7 +251,7 @@ export function ConversionPage() {
                       )}
                     </S.NoteItemHeader>
                     <S.NoteTags>
-                      {note.tags.map((tag) => (
+                      {note.tags?.map((tag) => (
                         <S.Tag key={`${note.id}-${tag}`}>{tag}</S.Tag>
                       ))}
                     </S.NoteTags>
@@ -237,7 +267,7 @@ export function ConversionPage() {
                   <S.NoteDetailsTitle>{activeNote.title}</S.NoteDetailsTitle>
                 </S.NoteDetailsHeader>
                 <S.NoteDetailsTags>
-                  {activeNote.tags.map((tag) => (
+                  {activeNote.tags?.map((tag) => (
                     <S.Tag key={`active-${tag}`}>{tag}</S.Tag>
                   ))}
                 </S.NoteDetailsTags>
@@ -306,7 +336,7 @@ export function ConversionPage() {
                               </S.RemoveAssignment>
                             </S.AssignedNoteHeader>
                             <S.AssignedTags>
-                              {note.tags.map((tag) => (
+                              {note.tags?.map((tag) => (
                                 <S.Tag key={`${note.id}-${category.id}-${tag}`}>
                                   {tag}
                                 </S.Tag>
@@ -322,9 +352,14 @@ export function ConversionPage() {
             </S.QuadrantGrid>
 
             <S.ActionsRow>
-              <S.FinalizeButton onClick={handleFinalizeConversion}>
+              <S.FinalizeButton
+                onClick={handleFinalizeConversion}
+                disabled={updateMapping.isPending}
+              >
                 <ListChecks size={16} />
-                Finalize PARA Mapping
+                {updateMapping.isPending
+                  ? "Saving..."
+                  : "Finalize PARA Mapping"}
               </S.FinalizeButton>
               <S.UnassignedInfo>
                 {unassignedNotes.length === 0
@@ -355,22 +390,19 @@ export function ConversionPage() {
     );
   };
 
-  const renderParaToZettelkasten = () => {
-    return (
-      <S.PlaceholderCard>
-        <S.PlaceholderTitle>PARA → Zettelkasten</S.PlaceholderTitle>
-        <S.PlaceholderText>
-          We are designing guided flows that break PARA projects into atomic,
-          linked notes. This workspace will let you preview project material,
-          pick the narrative thread, and stage backlinks before publishing.
-        </S.PlaceholderText>
-        <S.PlaceholderText>
-          Stay tuned—this feature is next on the roadmap once the PARA export
-          workflow is validated.
-        </S.PlaceholderText>
-      </S.PlaceholderCard>
-    );
-  };
+  const renderParaToZettelkasten = () => (
+    <S.PlaceholderCard>
+      <S.PlaceholderTitle>PARA → Zettelkasten</S.PlaceholderTitle>
+      <S.PlaceholderText>
+        We are designing guided flows that break PARA projects into atomic,
+        linked notes.
+      </S.PlaceholderText>
+      <S.PlaceholderText>
+        Stay tuned—this feature is next on the roadmap once the PARA export
+        workflow is validated.
+      </S.PlaceholderText>
+    </S.PlaceholderCard>
+  );
 
   return (
     <ThemeProvider theme={theme}>
