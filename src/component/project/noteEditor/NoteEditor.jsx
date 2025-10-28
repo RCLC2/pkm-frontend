@@ -1,6 +1,6 @@
-"use client";
-import { useYorkieEditor } from "../../yorkie/YorkieProvider";
-import { useState, useEffect } from "react";
+// "use client";
+import { useYorkieEditor } from "../../../hooks/yorkie/useYorkieEditor";
+import { useEffect, useState, useCallback } from "react";
 import { ThemeProvider } from "styled-components";
 import { theme } from "../../../styled/thema";
 import * as S from "./NoteEditorStyled";
@@ -11,8 +11,7 @@ import { useUpdateNote } from "../../../hooks/note/useUpdateNote";
 import { useDeleteNote } from "../../../hooks/note/useDeleteNote";
 
 export function NoteEditor({ noteId }) {
-  const { doc } = useYorkieEditor(noteId);
-
+  const { doc, updateDoc, status, error, isAttached } = useYorkieEditor(`note-${noteId}`, noteId);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [tags, setTags] = useState([]);
@@ -35,6 +34,13 @@ export function NoteEditor({ noteId }) {
       setTags([]);
     }
   }, [note]);
+  
+  const onTitleChange = useCallback((e) => {
+    const newTitle = e.target.value;
+    updateDoc((root) => {
+      root.title = newTitle;
+    }, `update title: ${newTitle}`);
+  }, [updateDoc]);
 
   // 수정
   const handleSave = () => {
@@ -67,13 +73,30 @@ export function NoteEditor({ noteId }) {
 
   // 태그 추가/삭제
   const addTag = () => {
-    if (newTag && !tags.includes(newTag)) {
-      setTags([...tags, newTag.startsWith("#") ? newTag : `#${newTag}`]);
+    if (!doc || !isAttached) return;
+
+    if (newTag) {
+      const tagToAdd = newTag.startsWith("#") ? newTag : `#${newTag}`;
+      updateDoc((root) => {
+        if (!root.tags) root.tags = [];
+        if (!root.tags.includes(tagToAdd)) {
+          root.tags.push(tagToAdd);
+        }
+      }, `add tag: ${tagToAdd}`);
+
       setNewTag("");
     }
   };
   const removeTag = (tagToRemove) => {
-    setTags(tags.filter((tag) => tag !== tagToRemove));
+    if (!doc || !isAttached) return;
+    updateDoc((root) => {
+      if (root.tags) {
+        const index = root.tags.indexOf(tagToRemove);
+        if (index > -1) {
+          root.tags.splice(index, 1);
+        }
+      }
+    }, `remove tag: ${tagToRemove}`);
   };
 
   // 로딩 상태
@@ -89,7 +112,7 @@ export function NoteEditor({ noteId }) {
     );
   }
 
-  if (!noteId) {
+  if (!isAttached || !noteId) {
     return (
       <ThemeProvider theme={theme}>
         <S.EmptyState>
@@ -97,12 +120,14 @@ export function NoteEditor({ noteId }) {
             <S.EmptyStateIcon>
               <FileText size={48} />
             </S.EmptyStateIcon>
-            <p>Select or create a note to start editing</p>
+            <p>{!noteId ? "Select a note to start editing" : `Yorkie ${status}...`}</p>
+            {error && <p style={{ color: 'red', marginTop: '10px' }}>Error: {error}</p>}
           </S.EmptyStateContent>
         </S.EmptyState>
       </ThemeProvider>
     );
   }
+  
 
   return (
     <ThemeProvider theme={theme}>
@@ -111,7 +136,7 @@ export function NoteEditor({ noteId }) {
           <S.ToolbarButtons>
             <S.SaveButton onClick={handleSave}>
               <Save size={16} />
-              Save
+              Synced ({status})
             </S.SaveButton>
             <S.DeleteButton onClick={handleDelete}>
               <Trash2 size={16} />
@@ -145,14 +170,11 @@ export function NoteEditor({ noteId }) {
         <S.EditorContent>
           <S.TitleInput
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={onTitleChange}
             placeholder="Note title..."
           />
-          <TiptapEditor
-            content={content}
-            onChange={setContent}
-            yorkieDoc={doc}
-          />
+
+          <TiptapEditor yorkieDoc={doc}/>
 
           <S.Metadata>
             <S.MetadataItem>

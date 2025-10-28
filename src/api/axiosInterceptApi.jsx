@@ -1,20 +1,21 @@
 import axios from "axios";
 
-const SERVICE_PORT_MAP = {
-  user: 8080,
-  note: 8002,
-  graph: 8003,
-  topic: 8004,
+const SERVICE_PATH_PREFIX = {
+  user: "/api/v1/users",
+  note: "/api/v1/notes",
+  graph: "/api/v1/graphs",
 };
 
+const GATEWAY_BASE_URL = import.meta.env.GATEWAY_BASE_URL;
+
 export const api = (service) => {
-  const port = SERVICE_PORT_MAP[service];
-  if (!port) {
+  const prefix = SERVICE_PATH_PREFIX[service];
+  if (!prefix) {
     throw new Error(` Unknown service name: ${service}`);
   }
 
   const instance = axios.create({
-    baseURL: `http://localhost:${port}`,
+    baseURL: `${GATEWAY_BASE_URL}${prefix}`,
     withCredentials: true, // 쿠키 자동 포함
   });
 
@@ -22,9 +23,11 @@ export const api = (service) => {
     const cookies = document.cookie;
     const matchToken = cookies.match(/accessToken=([^;]+)/);
     const accessToken = matchToken ? matchToken[1] : null;
-    if (accessToken) request.headers.Authorization = `Bearer ${accessToken}`;
-    if (!accessToken) {
+    if (accessToken) {
+      request.headers.Authorization = `Bearer ${accessToken}`;
+    } else {
       window.location.href = "/login";
+      return Promise.reject(new Error("No access token; redirecting to login."));
     }
     return request;
   });
@@ -45,7 +48,7 @@ export const api = (service) => {
         try {
           console.log(" AccessToken 만료 → refresh 요청 중...");
           const refreshResponse = await axios.post(
-            "http://localhost:8080/auth/refresh",
+            `${GATEWAY_BASE_URL}${SERVICE_PATH_PREFIX.user}/auth/refresh`,
             {},
             { withCredentials: true } // 쿠키 포함
           );

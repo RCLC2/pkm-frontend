@@ -201,6 +201,11 @@ export const MetadataItem = styled.div`
   gap: ${(props) => props.theme.spacing[1]};
 `;
 
+export const EmptyStateIcon = styled.div`
+  color: ${(props) => props.theme.colors.mutedForeground};
+  margin-bottom: ${(props) => props.theme.spacing[4]};
+`;
+
 export const EmptyState = styled.div`
   flex: 1;
   display: flex;
