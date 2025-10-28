@@ -47,6 +47,7 @@ export const getNotesByIds = async (params) => {
   return res.data.data;
 };
 
+// PARA 매핑 업데이트
 export const updateParaMapping = async (data) => {
   const res = await noteApi.post("/note/para-mapping", data);
   return res.data.data;
