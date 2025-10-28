@@ -1,7 +1,7 @@
 "use client";
 
 import { useNavigate } from "react-router-dom";
-import { useGetWorkspaces } from "../../hooks/workspace/useGetWorkspaces"; // ✅ 백엔드 조회 훅
+import { useGetWorkspaces } from "../../hooks/workspace/useGetWorkspaces"; // 백엔드 조회 훅
 import { ProjectCreation } from "./projectCreation/ProjectCreation";
 
 export function ProjectsPage() {
