@@ -1,5 +1,7 @@
 import axios from "axios";
 
+const GATEWAY_BASE_URL = import.meta.env.VITE_GATEWAY_BASE_URL;
+
 export const GOOGLE_AUTH_URL =
   "https://accounts.google.com/o/oauth2/v2/auth?" +
   new URLSearchParams({
@@ -15,7 +17,7 @@ export const GOOGLE_AUTH_URL =
 
 export async function sendGoogleCode(code) {
   const res = await axios.post(
-    "http://localhost:8080/auth/google/callback",
+    `${GATEWAY_BASE_URL}/api/v1/users/auth/google/callback`,
     { code },
     { withCredentials: true } // 쿠키 수신
   );
