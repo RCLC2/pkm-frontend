@@ -38,6 +38,9 @@ importers:
       '@tiptap/starter-kit':
         specifier: ^3.6.6
         version: 3.6.6
+      '@yorkie-js/sdk':
+        specifier: ^0.6.34
+        version: 0.6.34
       axios:
         specifier: ^1.12.2
         version: 1.12.2
@@ -1432,6 +1435,13 @@ packages:
 
   '@xtuc/long@4.2.2':
     resolution: {integrity: sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==}
+
+  '@yorkie-js/schema@0.6.34':
+    resolution: {integrity: sha512-XWEFOMWW8JIy0xf83Ww0mB3aeHHsjmJIzAt2vtkFQXfFB7PhYMMC27xB9iEfvlXHjzNuN5hCjOUZaumNGKIAlg==}
+
+  '@yorkie-js/sdk@0.6.34':
+    resolution: {integrity: sha512-mGj9d86ow4rHlTe9tmOt9q9Licy0I7EAf/5P1qqpWns/VfyZTrPdmX6lTxIk2yLzUgkninjQKdO0HZ4zrtGwIA==}
+    engines: {node: '>=18.0.0', npm: '>=7.1.0', pnpm: '>=9.6.0'}
 
   '@zeplin/extension-model@2.18.2':
     resolution: {integrity: sha512-D76jZNIkZEpRBzj5lSJhpI2/gIZZIYmyLIC4PuVue7dz+Dl6M/4Cidbfb6f0xY8e0tQ16MJAlU5ljLvH6r6KzA==}
@@ -6455,7 +6465,10 @@ snapshots:
       jest-runner: 25.5.4
       jest-runtime: 25.5.4
     transitivePeerDependencies:
+      - bufferutil
+      - canvas
       - supports-color
+      - utf-8-validate
 
   '@jest/transform@25.5.1':
     dependencies:
@@ -6996,6 +7009,16 @@ snapshots:
   '@xtuc/ieee754@1.2.0': {}
 
   '@xtuc/long@4.2.2': {}
+
+  '@yorkie-js/schema@0.6.34': {}
+
+  '@yorkie-js/sdk@0.6.34':
+    dependencies:
+      '@bufbuild/protobuf': 1.10.1
+      '@connectrpc/connect': 1.7.0(@bufbuild/protobuf@1.10.1)
+      '@connectrpc/connect-web': 1.7.0(@bufbuild/protobuf@1.10.1)(@connectrpc/connect@1.7.0(@bufbuild/protobuf@1.10.1))
+      '@yorkie-js/schema': 0.6.34
+      long: 5.3.2
 
   '@zeplin/extension-model@2.18.2': {}
 
