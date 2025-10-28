@@ -20,6 +20,7 @@
     "@tiptap/extension-typography": "^3.6.6",
     "@tiptap/react": "^3.6.6",
     "@tiptap/starter-kit": "^3.6.6",
+    "@yorkie-js/sdk": "^0.6.34",
     "axios": "^1.12.2",
     "lucide-react": "^0.543.0",
     "motion": "^12.23.13",
