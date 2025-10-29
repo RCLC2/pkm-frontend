@@ -6,8 +6,8 @@ export const GOOGLE_AUTH_URL =
   "https://accounts.google.com/o/oauth2/v2/auth?" +
   new URLSearchParams({
     client_id:
-      "747894176511-8lam7tvqr6src5vaaiqc7rnsg3djn5ac.apps.googleusercontent.com",
-    redirect_uri: "http://localhost:5173/auth/google/callback",
+      "1068500046041-igknr2rtm1ims2lcq7qr6v4vv122j14a.apps.googleusercontent.com",
+    redirect_uri: "https://pkm.hpground.xyz/api/v1/users/auth/google/callback",
     response_type: "code",
     scope: "openid email profile",
     access_type: "offline",
@@ -16,11 +16,22 @@ export const GOOGLE_AUTH_URL =
   }).toString();
 
 export async function sendGoogleCode(code) {
-  const res = await axios.post(
-    `${GATEWAY_BASE_URL}/api/v1/users/auth/google/callback`,
-    { code },
-    { withCredentials: true } // 쿠키 수신
+  const res = await axios.get(
+    `${GATEWAY_BASE_URL}/api/v1/users/auth/google/callback?code=${code}`,
+    { withCredentials: true }
   );
+
+  const accessToken = res.headers["accesstoken"];
+  const refreshToken = res.headers["refreshtoken"];
+
+  if (!accessToken || !refreshToken) {
+    throw new Error("토큰을 응답 헤더에서 찾을 수 없습니다.");
+  }
+
+  // 쿠키에 토큰 저장
+  // max-age는 초 단위 (accessToken: 1시간, refreshToken: 7일)
+  document.cookie = `accessToken=${accessToken}; path=/; secure; samesite=None; max-age=3600;`;
+  document.cookie = `refreshToken=${refreshToken}; path=/; secure; samesite=None; max-age=604800;`;
 
   return res.data.data;
 }
