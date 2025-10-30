@@ -7,12 +7,12 @@ export const getWorkspaces = async (userId) => {
   const res = await workspaceApi.get("/workspaces", {
     headers: { "X-User-ID": userId },
   });
-  return res.data.data;
+  return res.data;
 };
 
 // 워크스페이스 생성
-export const createWorkspace = async ({ name, type }) => {
-  const res = await workspaceApi.post("/workspaces", { name, type });
+export const createWorkspace = async ({ title, type }) => {
+  const res = await workspaceApi.post("/workspaces", { title, type });
   return res.data.data;
 };
 

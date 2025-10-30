@@ -191,7 +191,7 @@ export function ProjectCreation({
       const type = selectedMethodology === "zettelkasten" ? "zettel" : "para";
 
       const requestBody = {
-        name: projectName.trim(),
+        title: projectName.trim(),
         type,
       };
 
