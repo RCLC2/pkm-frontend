@@ -6,7 +6,7 @@ const SERVICE_PATH_PREFIX = {
   graph: "/api/v1/graphs",
 };
 
-const GATEWAY_BASE_URL = import.meta.env.GATEWAY_BASE_URL;
+const GATEWAY_BASE_URL = import.meta.env.VITE_GATEWAY_BASE_URL;
 
 export const api = (service) => {
   const prefix = SERVICE_PATH_PREFIX[service];
@@ -27,7 +27,9 @@ export const api = (service) => {
       request.headers.Authorization = `Bearer ${accessToken}`;
     } else {
       window.location.href = "/login";
-      return Promise.reject(new Error("No access token; redirecting to login."));
+      return Promise.reject(
+        new Error("No access token; redirecting to login.")
+      );
     }
     return request;
   });
@@ -44,16 +46,29 @@ export const api = (service) => {
       if (status === 401 || status === 403) {
         original._retry = true;
 
+        // 쿠키에서 refreshToken 읽기
+        const cookies = document.cookie;
+        const matchRefresh = cookies.match(/refreshToken=([^;]+)/);
+        const refreshToken = matchRefresh ? matchRefresh[1] : null;
+
+        if (!refreshToken) {
+          console.warn("refreshToken 없음 → 로그인 페이지로 이동");
+          window.location.href = "/login";
+          return Promise.reject(err);
+        }
+
         // /auth/refresh 요청 시도
         try {
           console.log(" AccessToken 만료 → refresh 요청 중...");
           const refreshResponse = await axios.post(
             `${GATEWAY_BASE_URL}${SERVICE_PATH_PREFIX.user}/auth/refresh`,
             {},
-            { withCredentials: true } // 쿠키 포함
+            { headers: { Authorization: refreshToken } } // 쿠키 포함
           );
 
           const newToken = refreshResponse.data.data.accessToken;
+          document.cookie = `accessToken=${newToken}; path=/; secure; samesite=None; max-age=3600;`;
+
           console.log(" 새 accessToken 발급 완료:", newToken);
           original.headers.Authorization = `Bearer ${newToken}`;
           return instance(original);
