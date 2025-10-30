@@ -6,9 +6,8 @@ import { ProjectCreation } from "./projectCreation/ProjectCreation";
 
 export function ProjectsPage() {
   const navigate = useNavigate();
-  const userId = "12321"; // 로그인 된 유저 ID (테스트용)
 
-  const { data } = useGetWorkspaces(userId);
+  const { data } = useGetWorkspaces();
   const workspaces = data?.data || [];
 
   const handleCreateProject = (template, projectName) => {

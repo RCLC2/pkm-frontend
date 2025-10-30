@@ -27,7 +27,9 @@ export const BookshelfSection = ({
             const noteCount = Math.max(0, Number(project.noteCount) || 0);
             const thickness = getBookThickness(noteCount);
             const height = 160 + Math.min(80, noteCount * 5);
-            const template = templates.find((item) => item.id === project.templateId);
+            const template = templates.find(
+              (item) => item.id === project.templateId
+            );
             const badgeLabel =
               project.methodology === "zettelkasten"
                 ? "Zettelkasten"
@@ -42,7 +44,7 @@ export const BookshelfSection = ({
                 onClick={() => onOpenProject(project)}
               >
                 <B.BookSpine>
-                  <B.BookTitle>{project.name}</B.BookTitle>
+                  <B.BookTitle>{project.title}</B.BookTitle>
                   <B.BookBadge>
                     {noteCount} {DEFAULT_NOTE_COUNT_LABEL}
                   </B.BookBadge>
@@ -50,7 +52,7 @@ export const BookshelfSection = ({
                 </B.BookSpine>
                 <B.BookEdge $thickness={thickness} />
                 <B.BookFooter>
-                  <span>Last edited {formatDate(project.lastModified)}</span>
+                  <span>Last edited {formatDate(project.updatedAt)}</span>
                   <B.BookFooterButton
                     type="button"
                     onClick={(event) => {
@@ -62,7 +64,9 @@ export const BookshelfSection = ({
                   </B.BookFooterButton>
                 </B.BookFooter>
                 <B.BookGlow />
-                <B.BookIcon>{template?.icon || <BookOpen size={20} />}</B.BookIcon>
+                <B.BookIcon>
+                  {template?.icon || <BookOpen size={20} />}
+                </B.BookIcon>
               </B.Book>
             );
           })}
@@ -76,12 +80,12 @@ export const BookshelfSection = ({
 
           return (
             <B.ProjectInsightCard key={`${project.id}-insight`}>
-              <B.ProjectInsightTitle>{project.name}</B.ProjectInsightTitle>
+              <B.ProjectInsightTitle>{project.title}</B.ProjectInsightTitle>
               <B.ProjectInsightMeta>
                 <span>
                   <strong>{noteCount}</strong> linked {DEFAULT_NOTE_COUNT_LABEL}
                 </span>
-                <span>{formatDate(project.lastModified)}</span>
+                <span>{formatDate(project.updatedAt)}</span>
               </B.ProjectInsightMeta>
               <B.ProjectInsightActions>
                 <Button
