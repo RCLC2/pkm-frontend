@@ -60,10 +60,13 @@ export function NoteEditor({ noteId }) {
   // 수정
   const handleSave = () => {
     if (!noteId) return alert("노트를 먼저 선택하세요.");
+
+    const workspaceData = window.localStorage.getItem("current_workspace");
+    const workspaceId = workspaceData ? JSON.parse(workspaceData).id : null;
     updateMutation.mutate(
       {
         id: noteId,
-        workspaceId: note.id,
+        workspaceId: workspaceId,
         title,
         description: title,
         contents: content,
