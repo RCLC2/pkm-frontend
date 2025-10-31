@@ -11,7 +11,11 @@ import { useUpdateNote } from "../../../hooks/note/useUpdateNote";
 import { useDeleteNote } from "../../../hooks/note/useDeleteNote";
 
 export function NoteEditor({ noteId }) {
-  const { doc, updateDoc, status, error, isAttached } = useYorkieEditor(`note-${noteId}`, noteId);
+  const { doc, root, updateDoc, status, error, isAttached } = useYorkieEditor(
+    `note-${noteId}`,
+    noteId
+  );
+
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [tags, setTags] = useState([]);
@@ -24,6 +28,14 @@ export function NoteEditor({ noteId }) {
   const deleteMutation = useDeleteNote();
 
   useEffect(() => {
+    if (root && isAttached) {
+      setTitle(root.title || "");
+      setContent(root.content?.toString() || "");
+      setTags(root.tags || []);
+    }
+  }, [root, isAttached]);
+
+  useEffect(() => {
     if (note) {
       setTitle(note.title || "");
       setContent(note.contents || "");
@@ -34,13 +46,16 @@ export function NoteEditor({ noteId }) {
       setTags([]);
     }
   }, [note]);
-  
-  const onTitleChange = useCallback((e) => {
-    const newTitle = e.target.value;
-    updateDoc((root) => {
-      root.title = newTitle;
-    }, `update title: ${newTitle}`);
-  }, [updateDoc]);
+
+  const onTitleChange = useCallback(
+    (e) => {
+      const newTitle = e.target.value;
+      updateDoc((root) => {
+        root.title = newTitle;
+      }, `update title: ${newTitle}`);
+    },
+    [updateDoc]
+  );
 
   // 수정
   const handleSave = () => {
@@ -48,14 +63,14 @@ export function NoteEditor({ noteId }) {
     updateMutation.mutate(
       {
         id: noteId,
-        workspaceId: note.workspaceId,
+        workspaceId: note.id,
         title,
         description: title,
         contents: content,
       },
       {
-        onSuccess: () => alert("저장 완료"),
-        onError: () => alert("저장 실패"),
+        onSuccess: () => console.log("저장 완료"),
+        onError: () => console.log("저장 실패"),
       }
     );
   };
@@ -99,6 +114,15 @@ export function NoteEditor({ noteId }) {
     }, `remove tag: ${tagToRemove}`);
   };
 
+  // 자동 저장 인터벌
+  // useEffect(() => {
+  //   if (!noteId) return;
+  //   const interval = setInterval(() => {
+  //     handleSave();
+  //   }, 3000);
+  //   return () => clearInterval(interval);
+  // }, [noteId, title, content]);
+
   // 로딩 상태
   if (isLoading) {
     return (
@@ -120,14 +144,19 @@ export function NoteEditor({ noteId }) {
             <S.EmptyStateIcon>
               <FileText size={48} />
             </S.EmptyStateIcon>
-            <p>{!noteId ? "Select a note to start editing" : `Yorkie ${status}...`}</p>
-            {error && <p style={{ color: 'red', marginTop: '10px' }}>Error: {error}</p>}
+            <p>
+              {!noteId
+                ? "Select a note to start editing"
+                : `Yorkie ${status}...`}
+            </p>
+            {error && (
+              <p style={{ color: "red", marginTop: "10px" }}>Error: {error}</p>
+            )}
           </S.EmptyStateContent>
         </S.EmptyState>
       </ThemeProvider>
     );
   }
-  
 
   return (
     <ThemeProvider theme={theme}>
@@ -174,7 +203,7 @@ export function NoteEditor({ noteId }) {
             placeholder="Note title..."
           />
 
-          <TiptapEditor yorkieDoc={doc}/>
+          <TiptapEditor yorkieDoc={doc} />
 
           <S.Metadata>
             <S.MetadataItem>

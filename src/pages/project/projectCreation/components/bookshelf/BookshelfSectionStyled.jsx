@@ -46,6 +46,80 @@ export const BookshelfOverlay = styled.div`
   filter: blur(24px);
 `;
 
+export const BookHoverInfo = styled.div`
+  position: absolute;
+  bottom: calc(100% + ${(props) => props.theme.spacing[3]});
+  left: 50%;
+  z-index: 2;
+  min-width: 200px;
+  max-width: 260px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: ${(props) => props.theme.spacing[4]};
+  padding: ${(props) => props.theme.spacing[4]};
+  border-radius: ${(props) => props.theme.borderRadius.md};
+  background: rgba(12, 12, 20, 0.92);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.35);
+  color: #ffffff;
+  text-align: left;
+  opacity: 0;
+  transform: translate(-50%, 8px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+`;
+
+export const BookHoverHeader = styled.div`
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: ${(props) => props.theme.spacing[3]};
+`;
+
+export const BookHoverTitle = styled.span`
+  font-size: ${(props) => props.theme.fontSizes.md};
+  font-weight: 600;
+  line-height: 1.3;
+  word-break: keep-all;
+`;
+
+export const BookHoverMode = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: ${(props) => props.theme.spacing[1]}
+    ${(props) => props.theme.spacing[2]};
+  border-radius: ${(props) => props.theme.borderRadius.sm};
+  background: rgba(255, 255, 255, 0.12);
+  font-size: ${(props) => props.theme.fontSizes.xs};
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+`;
+
+export const BookHoverMeta = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${(props) => props.theme.spacing[2]};
+  font-size: ${(props) => props.theme.fontSizes.sm};
+  color: rgba(255, 255, 255, 0.85);
+
+  strong {
+    font-size: ${(props) => props.theme.fontSizes.lg};
+    font-weight: 600;
+    color: #ffffff;
+  }
+`;
+
+export const BookHoverActions = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${(props) => props.theme.spacing[3]};
+  font-size: ${(props) => props.theme.fontSizes.xs};
+  color: rgba(255, 255, 255, 0.75);
+`;
+
 export const Book = styled.button`
   position: relative;
   display: flex;
@@ -69,6 +143,23 @@ export const Book = styled.button`
   &:hover {
     transform: translateY(-8px) rotate(-1deg);
     box-shadow: 0 28px 40px rgba(0, 0, 0, 0.35);
+  }
+
+  &:hover ${BookHoverInfo} {
+    opacity: 1;
+    transform: translate(-50%, 0);
+    pointer-events: auto;
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.6);
+    outline-offset: 3px;
+  }
+
+  &:focus-visible ${BookHoverInfo} {
+    opacity: 1;
+    transform: translate(-50%, 0);
+    pointer-events: auto;
   }
 `;
 
@@ -108,8 +199,11 @@ export const BookBadge = styled.span`
   line-height: 1;
 `;
 
-export const BookBadgeSecondary = styled(BookBadge)`
-  background: rgba(0, 0, 0, 0.25);
+export const BookModeBadge = styled(BookBadge)`
+  background: rgba(0, 0, 0, 0.35);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 `;
 
 export const BookEdge = styled.div`
@@ -137,20 +231,7 @@ export const BookEdge = styled.div`
   box-shadow: inset -2px 0 4px rgba(0, 0, 0, 0.2);
 `;
 
-export const BookFooter = styled.div`
-  position: absolute;
-  bottom: ${(props) => props.theme.spacing[3]};
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: ${(props) => props.theme.fontSizes.xs};
-  color: rgba(255, 255, 255, 0.85);
-`;
-
-export const BookFooterButton = styled.button`
+export const BookActionButton = styled.button`
   display: inline-flex;
   align-items: center;
   justify-content: center;

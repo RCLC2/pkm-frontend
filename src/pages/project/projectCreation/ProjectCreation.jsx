@@ -20,6 +20,7 @@ import { useBookshelfCustomization } from "./hooks/useBookshelfCustomization";
 import { BookshelfSection } from "./components/bookshelf/BookshelfSection";
 import { CustomizationPanel } from "./components/customization/CustomizationPanel";
 import { useCreateWorkspace } from "../../../hooks/workspace/useCreateWorkspace.jsx";
+import { useDeleteWorkspace } from "../../../hooks/workspace/useDeleteWorkspace.jsx";
 
 const wizardSteps = [
   {
@@ -70,7 +71,8 @@ export function ProjectCreation({
   const [activeTab, setActiveTab] = useState("recent");
   const [isCustomizationOpen, setIsCustomizationOpen] = useState(false);
 
-  const { mutate } = useCreateWorkspace();
+  const { mutate: createWorkspace } = useCreateWorkspace();
+  const { mutate: deleteWorkspace } = useDeleteWorkspace();
 
   const {
     points,
@@ -101,8 +103,14 @@ export function ProjectCreation({
   }, [selectedTemplate]);
 
   const handleDeleteProject = (projectId) => {
-    const updated = savedProjects.filter((p) => p.id !== projectId);
-    setSavedProjects(updated);
+    deleteWorkspace(projectId, {
+      onSuccess: () => {
+        setSavedProjects((prev) => prev.filter((project) => project.id !== projectId));
+      },
+      onError: (err) => {
+        console.error("워크스페이스 삭제 실패", err);
+      },
+    });
   };
 
   const formatDate = (dateString) => {
@@ -195,8 +203,8 @@ export function ProjectCreation({
         type,
       };
 
-      mutate(requestBody, {
-        onSuccess: () => {
+      createWorkspace(requestBody, {
+        onSuccess: (newWorkspace) => {
           alert(`워크스페이스 '${projectName}' 생성 완료`);
           setCurrentStep(0);
           setSelectedMethodology(null);
@@ -204,6 +212,9 @@ export function ProjectCreation({
           setProjectName("");
           setSearchQuery("");
           setActiveTab("recent");
+          if (newWorkspace) {
+            setSavedProjects((prev) => [newWorkspace, ...prev]);
+          }
         },
         onError: (err) => {
           console.error("워크스페이스 생성 실패:", err);

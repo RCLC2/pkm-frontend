@@ -8,7 +8,7 @@ export function ProjectsPage() {
   const navigate = useNavigate();
 
   const { data } = useGetWorkspaces();
-  const workspaces = data?.data || [];
+  const workspaces = data?.data ?? data ?? [];
 
   const handleCreateProject = (template, projectName) => {
     console.log("새 워크스페이스 생성 요청:", { template, projectName });
@@ -17,6 +17,7 @@ export function ProjectsPage() {
 
   const handleOpenProject = (workspace) => {
     console.log("열린 워크스페이스:", workspace);
+    localStorage.setItem("current_workspace", JSON.stringify(workspace));
     navigate("/dashboard");
   };
 

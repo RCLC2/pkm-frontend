@@ -7,6 +7,8 @@ import { theme } from "../../../styled/thema";
 import { Sidebar } from "../sidebar/Sidebar";
 import { SearchBar } from "../searchBar/SearchBar";
 import * as S from "./ProjectLayoutStyled";
+import { useCreateNote } from "../../../hooks/note/useCreateNote";
+import ParaCategoryModal from "./ParaCategoryModal"; // 모달 컴포넌트 import
 import {
   FileText,
   Network,
@@ -20,10 +22,13 @@ import {
 export function ProjectLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [currentProject, setCurrentProject] = useState(null);
+  const [currentProject, setCurrentProject] = useState({});
   const [activeNote, setActiveNote] = useState("welcome-note");
-  const [methodology, setMethodology] = useState("zettelkasten");
+
+  const [methodology, setMethodology] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
+
+  const createNoteMutation = useCreateNote();
 
   // Get active view from current route
   const getActiveView = () => {
@@ -36,13 +41,46 @@ export function ProjectLayout() {
   const activeView = getActiveView();
 
   useEffect(() => {
-    // Load project data from localStorage or URL params
-    const savedProjects = JSON.parse(
-      localStorage.getItem("knowledgebase-projects") || "[]"
-    );
-    if (savedProjects.length > 0) {
-      setCurrentProject(savedProjects[0]); // Load first project for demo
-      setMethodology(savedProjects[0].methodology);
+    const storedCurrent =
+      typeof window !== "undefined"
+        ? window.localStorage.getItem("current_workspace")
+        : null;
+
+    if (storedCurrent) {
+      try {
+        const parsed = JSON.parse(storedCurrent);
+        if (parsed && parsed.id) {
+          setCurrentProject(parsed);
+          setMethodology(
+            parsed.methodology ||
+              (parsed.type === "zettel" ? "zettelkasten" : "code-para")
+          );
+          return;
+        }
+      } catch (error) {
+        console.warn("[ProjectLayout] stored workspace parse 실패", error);
+      }
+    }
+
+    const fallbackList =
+      typeof window !== "undefined"
+        ? window.localStorage.getItem("knowledgebase-projects")
+        : null;
+
+    if (fallbackList) {
+      try {
+        const parsedList = JSON.parse(fallbackList);
+        if (Array.isArray(parsedList) && parsedList.length > 0) {
+          const fallback = parsedList[0];
+          setCurrentProject(fallback);
+          setMethodology(
+            fallback.methodology ||
+              (fallback.type === "zettel" ? "zettelkasten" : "code-para")
+          );
+        }
+      } catch (error) {
+        console.warn("[ProjectLayout] fallback workspace parse 실패", error);
+      }
     }
   }, []);
 
@@ -67,8 +105,59 @@ export function ProjectLayout() {
     navigate(`/dashboard/editor/${noteId}`);
   };
 
+  const [isModalOpen, setIsModalOpen] = useState(false); // 모달 상태 추가
+
+  const handleQuickActionClick = () => {
+    if (currentProject.type === "zettel") {
+      // 제텔카스텐: 바로 노트 생성
+      handleCreateNote();
+    } else {
+      // PARA: 모달 열기
+      setIsModalOpen(true);
+    }
+  };
+
+  const handleCategorySelect = (category) => {
+    handleCreateNote(category);
+  };
+
+  const handleCreateNote = (paraCategory = null) => {
+    if (!currentProject?.id) {
+      alert("워크스페이스 ID가 없습니다.");
+      return;
+    }
+
+    const noteData = {
+      workspaceId: currentProject.id,
+      title: "새 노트",
+      description: "",
+      contents: "",
+    };
+
+    // PARA 방법론인 경우 카테고리 추가
+    if (paraCategory) {
+      noteData.paraCategory = paraCategory;
+    }
+
+    createNoteMutation.mutate(noteData, {
+      onSuccess: (data) => {
+        console.log(`노트가 생성되었습니다: ${data.title}`);
+        // ✅ 필요하다면 생성된 noteId로 페이지 이동도 가능
+        navigate(`/dashboard/editor/${data.id}`);
+      },
+      onError: () => {
+        alert("노트 생성 실패");
+      },
+    });
+  };
+
   return (
     <ThemeProvider theme={theme}>
+      <ParaCategoryModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSelect={handleCategorySelect}
+      />
       <S.AppContainer>
         <S.SidebarContainer>
           <S.SidebarHeader>
@@ -81,32 +170,22 @@ export function ProjectLayout() {
                   <ArrowLeft size={16} />
                 </S.BackButton>
                 <S.SidebarTitle>
-                  {currentProject?.name || "Knowledge Base"}
+                  {currentProject?.title || "Knowledge Base"}
                 </S.SidebarTitle>
               </S.SidebarTitleSection>
-              <S.AddButton>
+              <S.AddButton onClick={handleQuickActionClick}>
                 <Plus size={16} />
               </S.AddButton>
             </S.SidebarHeaderTop>
-
-            <S.MethodologySelector>
-              <S.Select
-                value={methodology}
-                onChange={(e) => setMethodology(e.target.value)}
-              >
-                <option value="zettelkasten">Zettelkasten</option>
-                <option value="code-para">CODE/PARA</option>
-              </S.Select>
-            </S.MethodologySelector>
-
             <SearchBar onSearch={setSearchKeyword} />
           </S.SidebarHeader>
           <Sidebar
             activeNote={activeNote}
             onNoteSelect={handleNoteSelect}
             methodology={methodology}
-            workspaceId={currentProject?.workspaceId}
+            workspaceId={currentProject?.id}
             searchKeyword={searchKeyword}
+            workspaceTitle={currentProject?.title}
           />
         </S.SidebarContainer>
 

@@ -30,10 +30,17 @@ export const BookshelfSection = ({
             const template = templates.find(
               (item) => item.id === project.templateId
             );
-            const badgeLabel =
-              project.methodology === "zettelkasten"
-                ? "Zettelkasten"
-                : "CODE/PARA";
+            const methodology = project.methodology?.toLowerCase();
+            const badgeLabel = (() => {
+              if (!methodology) return "GENERAL";
+              if (["zettelkasten", "zettel"].includes(methodology)) {
+                return "ZETTEL";
+              }
+              if (["para", "code_para", "code/para"].includes(methodology)) {
+                return "PARA";
+              }
+              return project.methodology.toUpperCase();
+            })();
 
             return (
               <B.Book
@@ -45,28 +52,37 @@ export const BookshelfSection = ({
               >
                 <B.BookSpine>
                   <B.BookTitle>{project.title}</B.BookTitle>
-                  <B.BookBadge>
-                    {noteCount} {DEFAULT_NOTE_COUNT_LABEL}
-                  </B.BookBadge>
-                  <B.BookBadgeSecondary>{badgeLabel}</B.BookBadgeSecondary>
+                  <B.BookModeBadge>{badgeLabel}</B.BookModeBadge>
                 </B.BookSpine>
                 <B.BookEdge $thickness={thickness} />
-                <B.BookFooter>
-                  <span>Last edited {formatDate(project.updatedAt)}</span>
-                  <B.BookFooterButton
-                    type="button"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      onDeleteProject(project.id);
-                    }}
-                  >
-                    <Trash2 size={14} />
-                  </B.BookFooterButton>
-                </B.BookFooter>
                 <B.BookGlow />
                 <B.BookIcon>
                   {template?.icon || <BookOpen size={20} />}
                 </B.BookIcon>
+                <B.BookHoverInfo>
+                  <B.BookHoverHeader>
+                    <B.BookHoverTitle>{project.title}</B.BookHoverTitle>
+                    <B.BookHoverMode>{badgeLabel}</B.BookHoverMode>
+                  </B.BookHoverHeader>
+                  <B.BookHoverMeta>
+                    <span>
+                      <strong>{noteCount}</strong> {DEFAULT_NOTE_COUNT_LABEL}
+                    </span>
+                    <span>Last edited {formatDate(project.updatedAt)}</span>
+                  </B.BookHoverMeta>
+                  <B.BookHoverActions>
+                    <span>Click to open</span>
+                    <B.BookActionButton
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onDeleteProject(project.id);
+                      }}
+                    >
+                      <Trash2 size={14} />
+                    </B.BookActionButton>
+                  </B.BookHoverActions>
+                </B.BookHoverInfo>
               </B.Book>
             );
           })}

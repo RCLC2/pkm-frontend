@@ -4,7 +4,7 @@ const workspaceApi = api("graph");
 
 // 모든 워크스페이스 조회
 export const getWorkspaces = async (userId) => {
-  const res = await workspaceApi.get("/workspaces", {
+  const res = await workspaceApi.get(`/workspaces`, {
     headers: { "X-User-ID": userId },
   });
   return res.data;
@@ -12,7 +12,7 @@ export const getWorkspaces = async (userId) => {
 
 // 워크스페이스 생성
 export const createWorkspace = async ({ title, type }) => {
-  const res = await workspaceApi.post("/workspaces", { title, type });
+  const res = await workspaceApi.post(`/workspaces`, { title, type });
   return res.data.data;
 };
 
@@ -33,10 +33,7 @@ export const deleteWorkspace = async (workspaceId) => {
 
 // 워크스페이스 스타일 변경
 export const changeWorkspaceStyle = async ({ workspaceId, newStyle }) => {
-  const res = await workspaceApi.post(
-    `/workspaces/${workspaceId}/style`,
-    newStyle
-  );
+  const res = await workspaceApi.post(`/workspaces/${workspaceId}/style`, newStyle);
   return res.data.data;
 };
 
@@ -47,3 +44,4 @@ export const getWorkspaceType = async ({ workspaceId, userId }) => {
   });
   return res.data.data;
 };
+

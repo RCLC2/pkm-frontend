@@ -15,8 +15,9 @@ export const getNoteById = async (id) => {
 };
 
 // 노트 수정
-export const updateNote = async (id) => {
-  const res = await noteApi.put(`/note/update/${id}`);
+export const updateNote = async (noteData) => {
+  const { id, ...payload } = noteData;
+  const res = await noteApi.put(`/note/update/${id}`, payload);
   return res.data.data;
 };
 
@@ -29,26 +30,26 @@ export const deleteNote = async (id) => {
 // 노트 검색으로 조회
 // params: { workspaceId, keyword, page, size, sort, direction }
 export const searchNotesByKeword = async (params) => {
-  const res = await noteApi.get("/note/search", { params });
+  const res = await noteApi.get(`/note/search`, { params });
   return res.data.data;
 };
 
 // 최근 노트 목록 조회
 // params: { workspaceId, page, size, sort, direction }
 export const getRecentNotes = async (params) => {
-  const res = await noteApi.get("/note/recent", { params });
+  const res = await noteApi.get(`/note/recent`, { params });
   return res.data.data;
 };
 
-// workspaceId 목록 기반 조회
-// params: { workspaceId }
+// workspaceId 기반 조회
 export const getNotesByIds = async (params) => {
-  const res = await noteApi.get("/note/ids", { params });
+  const res = await noteApi.get(`/note/ids`, { params });
   return res.data.data;
 };
 
 // PARA 매핑 업데이트
 export const updateParaMapping = async (data) => {
-  const res = await noteApi.post("/note/para-mapping", data);
+  const res = await noteApi.post(`/note/para-mapping`, data);
   return res.data.data;
 };
+

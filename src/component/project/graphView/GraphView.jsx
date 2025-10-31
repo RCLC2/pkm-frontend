@@ -11,7 +11,7 @@ import {
 } from "../../../mocks/hooks/project/graphNetwork";
 
 const graphService = mockGraphApi;
-const GRAPH_PROJECT_ID = DEMO_GRAPH_PROJECT_ID;
+const FALLBACK_PROJECT_ID = DEMO_GRAPH_PROJECT_ID;
 
 const TYPE_CONFIG = {
   note: { label: "Permanent Note" },
@@ -598,7 +598,11 @@ function screenToWorld(x, y, view) {
   };
 }
 
-function GraphViewInner({ methodology = "zettelkasten", onNavigateToNote }) {
+function GraphViewInner({
+  methodology = "zettelkasten",
+  onNavigateToNote,
+  projectId,
+}) {
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
   const ctxRef = useRef(null);
@@ -624,6 +628,7 @@ function GraphViewInner({ methodology = "zettelkasten", onNavigateToNote }) {
     selectedNodeId: null,
   });
   const highlightRef = useRef({ selectedId: null, hoveredId: null });
+  const projectIdRef = useRef(projectId || FALLBACK_PROJECT_ID);
   const selectionRef = useRef(null);
   const linkSourceRef = useRef(null);
   const tooltipRef = useRef(null);
@@ -649,6 +654,10 @@ function GraphViewInner({ methodology = "zettelkasten", onNavigateToNote }) {
   useEffect(() => {
     tooltipRef.current = tooltip;
   }, [tooltip]);
+
+  useEffect(() => {
+    projectIdRef.current = projectId || FALLBACK_PROJECT_ID;
+  }, [projectId]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -783,7 +792,7 @@ function GraphViewInner({ methodology = "zettelkasten", onNavigateToNote }) {
     const loadGraphFromApi = async () => {
       try {
         const payload = await graphService.fetchGraph({
-          projectId: GRAPH_PROJECT_ID,
+          projectId: projectIdRef.current,
           methodology,
         });
         if (!cancelled) {
@@ -916,7 +925,7 @@ function GraphViewInner({ methodology = "zettelkasten", onNavigateToNote }) {
 
       void graphService
         .createBacklink({
-          projectId: GRAPH_PROJECT_ID,
+          projectId: projectIdRef.current,
           sourceId: from,
           targetId: to,
         })
@@ -992,7 +1001,7 @@ function GraphViewInner({ methodology = "zettelkasten", onNavigateToNote }) {
 
       void graphService
         .deleteBacklink({
-          projectId: GRAPH_PROJECT_ID,
+          projectId: projectIdRef.current,
           sourceId: from,
           targetId: to,
         })
@@ -1193,7 +1202,7 @@ function GraphViewInner({ methodology = "zettelkasten", onNavigateToNote }) {
       canvas.removeEventListener("pointerleave", onPointerLeave);
       canvas.removeEventListener("wheel", onWheel);
     };
-  }, [methodology]);
+  }, [methodology, projectId]);
 
   const handleZoom = (direction) => {
     const view = viewRef.current;
@@ -1446,29 +1455,16 @@ function GraphViewInner({ methodology = "zettelkasten", onNavigateToNote }) {
   );
 }
 
-export function GraphView({ methodology = "zettelkasten", onNavigateToNote }) {
-  if (methodology !== "zettelkasten") {
-    return (
-      <ThemeProvider theme={theme}>
-        <S.GraphContainer>
-          <S.EmptyState>
-            <S.EmptyStateBadge>Not support!</S.EmptyStateBadge>
-            <S.EmptyStateTitle>
-              CODE/PARA 모드에서는 그래프를 지원하지 않습니다.
-            </S.EmptyStateTitle>
-            <S.EmptyStateDescription>
-              Zettelkasten 방법론에서만 네트워크 그래프를 제공하고 있습니다.
-            </S.EmptyStateDescription>
-          </S.EmptyState>
-        </S.GraphContainer>
-      </ThemeProvider>
-    );
-  }
-
+export function GraphView({
+  methodology = "zettelkasten",
+  onNavigateToNote,
+  projectId,
+}) {
   return (
     <GraphViewInner
       methodology={methodology}
       onNavigateToNote={onNavigateToNote}
+      projectId={projectId}
     />
   );
 }

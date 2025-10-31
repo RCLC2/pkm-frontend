@@ -5,8 +5,8 @@ export const issueYorkieToken = async (noteId) => {
   const response = await userApi.post("/yorkie/token", { noteId });
 
   // 쿠키 삭제
-  document.cookie = "accessToken=; path=/; max-age=0;";
-  document.cookie = "refreshToken=; path=/; max-age=0;";
+  // document.cookie = "accessToken=; path=/; max-age=0;";
+  // document.cookie = "refreshToken=; path=/; max-age=0;";
   return response.data.data;
 };
 
