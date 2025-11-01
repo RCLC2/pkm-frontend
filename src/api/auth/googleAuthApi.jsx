@@ -21,6 +21,8 @@ export async function sendGoogleCode(code) {
     { withCredentials: true }
   );
 
+  console.log(res);
+
   const accessToken = res.headers["accesstoken"];
   const refreshToken = res.headers["refreshtoken"];
 

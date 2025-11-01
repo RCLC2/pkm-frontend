@@ -101,8 +101,10 @@ export function ProjectLayout() {
   };
 
   const handleNoteSelect = (noteId) => {
-    setActiveNote(noteId);
-    navigate(`/dashboard/editor/${noteId}`);
+    if (!noteId) return;
+    const normalizedId = String(noteId);
+    setActiveNote(normalizedId);
+    navigate(`/dashboard/editor/${normalizedId}`);
   };
 
   const [isModalOpen, setIsModalOpen] = useState(false); // 모달 상태 추가
@@ -136,7 +138,7 @@ export function ProjectLayout() {
 
     // PARA 방법론인 경우 카테고리 추가
     if (paraCategory) {
-      noteData.paraCategory = paraCategory;
+      noteData.paraCategory = String(paraCategory).toUpperCase();
     }
 
     createNoteMutation.mutate(noteData, {
@@ -144,6 +146,8 @@ export function ProjectLayout() {
         console.log(`노트가 생성되었습니다: ${data.title}`);
         // ✅ 필요하다면 생성된 noteId로 페이지 이동도 가능
         navigate(`/dashboard/editor/${data.id}`);
+        setActiveNote(String(data.id));
+        setIsModalOpen(false);
       },
       onError: () => {
         alert("노트 생성 실패");
@@ -207,13 +211,17 @@ export function ProjectLayout() {
                   <FileText size={16} />
                   Editor
                 </S.TabButton>
-                <S.TabButton
-                  active={activeView === "graph"}
-                  onClick={() => handleViewChange("graph")}
-                >
-                  <Network size={16} />
-                  Graph
-                </S.TabButton>
+                {currentProject.type === "zettel" ? (
+                  <S.TabButton
+                    active={activeView === "graph"}
+                    onClick={() => handleViewChange("graph")}
+                  >
+                    <Network size={16} />
+                    Graph
+                  </S.TabButton>
+                ) : (
+                  ""
+                )}
                 <S.TabButton
                   active={activeView === "convert"}
                   onClick={() => handleViewChange("convert")}

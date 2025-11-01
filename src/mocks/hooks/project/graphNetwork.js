@@ -232,54 +232,44 @@ export const mockGraphApi = {
   async fetchGraph({ projectId = DEMO_PROJECT_ID, methodology = "zettelkasten" }) {
     const store = readEdgeStore();
 
-    // 1. Try workspace graph API first
-    if (projectId) {
-      try {
-        const apiGraph = await getWorkspaceGraph(projectId);
-        const nodes = Array.isArray(apiGraph?.nodes)
-          ? apiGraph.nodes
-              .map((node) => normalizeApiNode(node, methodology))
-              .filter(Boolean)
-          : [];
-        const edges = Array.isArray(apiGraph?.edges)
-          ? dedupeEdges(apiGraph.edges.map(normalizeApiEdge).filter(Boolean))
-          : [];
-
-        if (nodes.length) {
-          const mergedEdges = mergeEdges(store[projectId], edges, new Set(nodes.map((n) => n.id)));
-          if (!store[projectId] || store[projectId].length !== mergedEdges.length) {
-            store[projectId] = mergedEdges;
-            writeEdgeStore(store);
-          }
-          return { projectId, nodes, edges: mergedEdges };
-        }
-      } catch (error) {
-        console.warn("[graphNetwork] workspace graph api 실패", error);
-      }
+    if (!projectId) {
+      return { projectId, nodes: [], edges: [] };
     }
 
-    // 2. Fallback to note-derived graph
-    const noteGraph = projectId
-      ? await buildGraphFromNotes(projectId, methodology)
-      : null;
-    if (noteGraph?.nodes?.length) {
-      const validIds = new Set(noteGraph.nodes.map((node) => node.id));
-      const stored = Array.isArray(store[projectId]) ? store[projectId] : [];
-      const mergedEdges = mergeEdges(stored, noteGraph.edges, validIds);
-      if (stored.length !== mergedEdges.length) {
+    try {
+      const apiGraph = await getWorkspaceGraph(projectId);
+      console.log("[graphNetwork] workspace graph api response", apiGraph);
+
+      const nodes = Array.isArray(apiGraph?.nodes)
+        ? apiGraph.nodes
+            .map((node) => normalizeApiNode(node, methodology))
+            .filter(Boolean)
+        : [];
+
+      const edgesFromApi = Array.isArray(apiGraph?.edges)
+        ? dedupeEdges(apiGraph.edges.map(normalizeApiEdge).filter(Boolean))
+        : [];
+
+      if (!nodes.length) {
+        return { projectId, nodes: [], edges: [] };
+      }
+
+      const validIds = new Set(nodes.map((node) => String(node.id)));
+      const storedEdges = Array.isArray(store[projectId]) ? store[projectId] : [];
+      const mergedEdges = mergeEdges(storedEdges, edgesFromApi, validIds);
+
+      if (mergedEdges.length !== storedEdges.length) {
         store[projectId] = mergedEdges;
         writeEdgeStore(store);
       }
-      return { projectId, nodes: noteGraph.nodes, edges: mergedEdges };
-    }
 
-    // 3. Final fallback to preset dataset
-    const presetGraph = buildPresetGraph(methodology);
-    return {
-      projectId,
-      nodes: presetGraph.nodes,
-      edges: presetGraph.edges,
-    };
+      const response = { projectId, nodes, edges: mergedEdges };
+      console.log("[graphNetwork] normalized graph response", response);
+      return response;
+    } catch (error) {
+      console.error("[graphNetwork] workspace graph api error", error);
+      return { projectId, nodes: [], edges: [] };
+    }
   },
 
   async createBacklink({ projectId = DEMO_PROJECT_ID, sourceId, targetId }) {

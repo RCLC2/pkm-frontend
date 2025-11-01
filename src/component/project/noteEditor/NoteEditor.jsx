@@ -1,6 +1,6 @@
 // "use client";
 import { useYorkieEditor } from "../../../hooks/yorkie/useYorkieEditor";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { ThemeProvider } from "styled-components";
 import { theme } from "../../../styled/thema";
 import * as S from "./NoteEditorStyled";
@@ -10,10 +10,16 @@ import { useGetNoteById } from "../../../hooks/note/useGetNoteById";
 import { useUpdateNote } from "../../../hooks/note/useUpdateNote";
 import { useDeleteNote } from "../../../hooks/note/useDeleteNote";
 
-export function NoteEditor({ noteId }) {
+export function NoteEditor({ noteId, workspaceId, workspace }) {
+  const yorkieDocKey = useMemo(() => {
+    if (!noteId) return null;
+    return `note-${noteId}`;
+  }, [noteId]);
+
   const { doc, root, updateDoc, status, error, isAttached } = useYorkieEditor(
-    `note-${noteId}`,
-    noteId
+    yorkieDocKey,
+    noteId,
+    workspace
   );
 
   const [title, setTitle] = useState("");
@@ -36,6 +42,13 @@ export function NoteEditor({ noteId }) {
   }, [root, isAttached]);
 
   useEffect(() => {
+    setTitle("");
+    setContent("");
+    setTags([]);
+    setNewTag("");
+  }, [noteId]);
+
+  useEffect(() => {
     if (note) {
       setTitle(note.title || "");
       setContent(note.contents || "");
@@ -47,6 +60,35 @@ export function NoteEditor({ noteId }) {
     }
   }, [note]);
 
+  useEffect(() => {
+    if (!note || !isAttached) return;
+
+    updateDoc((draft) => {
+      const nextTitle = note.title || "";
+      if (draft.title !== nextTitle) {
+        draft.title = nextTitle;
+      }
+
+      const nextTags = Array.isArray(note.tags) ? [...note.tags] : [];
+      const currentTags = Array.isArray(draft.tags) ? draft.tags : [];
+      const tagsChanged =
+        nextTags.length !== currentTags.length ||
+        nextTags.some((tag, index) => tag !== currentTags[index]);
+
+      if (tagsChanged) {
+        draft.tags = nextTags;
+      }
+
+      if (!draft.content) return;
+
+      const nextContent = note.contents || "";
+      const currentContent = draft.content.toString();
+      if (currentContent !== nextContent) {
+        draft.content.edit(0, currentContent.length, nextContent);
+      }
+    }, "sync note from api");
+  }, [noteId, note, isAttached, updateDoc]);
+
   const onTitleChange = useCallback(
     (e) => {
       const newTitle = e.target.value;
@@ -57,19 +99,24 @@ export function NoteEditor({ noteId }) {
     [updateDoc]
   );
 
+  const effectiveWorkspaceId = note?.workspaceId || workspaceId;
+
   // 수정
   const handleSave = () => {
     if (!noteId) return alert("노트를 먼저 선택하세요.");
+    if (!effectiveWorkspaceId) {
+      alert("워크스페이스 정보를 찾을 수 없습니다.");
+      return;
+    }
 
-    const workspaceData = window.localStorage.getItem("current_workspace");
-    const workspaceId = workspaceData ? JSON.parse(workspaceData).id : null;
     updateMutation.mutate(
       {
         id: noteId,
-        workspaceId: workspaceId,
+        workspaceId: effectiveWorkspaceId,
         title,
-        description: title,
+        description: note?.description || title,
         contents: content,
+        paraCategory: note?.paraCategory,
       },
       {
         onSuccess: () => console.log("저장 완료"),

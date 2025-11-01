@@ -9,6 +9,14 @@ export const useDeleteNote = () => {
     onSuccess: (id) => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       queryClient.invalidateQueries({ queryKey: ["note", id] });
+      queryClient.invalidateQueries({
+        queryKey: ["notes", "ids"],
+        exact: false,
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["notes", "search"],
+        exact: false,
+      });
     },
   });
 };

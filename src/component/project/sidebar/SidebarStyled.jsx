@@ -12,6 +12,39 @@ export const SidebarContent = styled.div`
   gap: ${(props) => props.theme.spacing[2]};
 `;
 
+export const FilterBar = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${(props) => props.theme.spacing[2]};
+  margin-bottom: ${(props) => props.theme.spacing[2]};
+`;
+
+export const FilterChip = styled.button`
+  padding: ${(props) => props.theme.spacing[1]}
+    ${(props) => props.theme.spacing[2]};
+  border-radius: ${(props) => props.theme.borderRadius.md};
+  border: 1px solid
+    ${(props) =>
+      props.$active
+        ? props.theme.colors.accent
+        : props.theme.colors.border};
+  background-color: ${(props) =>
+    props.$active ? props.theme.colors.accent : "transparent"};
+  color: ${(props) =>
+    props.$active
+      ? props.theme.colors.accentForeground
+      : props.theme.colors.sidebarForeground};
+  font-size: ${(props) => props.theme.fontSizes.xs};
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: ${(props) => props.theme.colors.accent};
+    color: ${(props) => props.theme.colors.accentForeground};
+  }
+`;
+
 export const MethodologyInfo = styled.div`
   margin-bottom: ${(props) => props.theme.spacing[4]};
   padding: ${(props) => props.theme.spacing[3]};
@@ -35,6 +68,21 @@ export const MethodologyDescription = styled.p`
 
 export const SectionContainer = styled.div`
   margin-bottom: ${(props) => props.theme.spacing[1]};
+  border: ${(props) =>
+    props.$isDroppable
+      ? `1px dashed ${
+          props.$isDragTarget
+            ? props.theme.colors.accent
+            : props.theme.colors.border
+        }`
+      : "none"};
+  border-radius: ${(props) => props.theme.borderRadius.md};
+  padding: ${(props) => (props.$isDroppable ? props.theme.spacing[2] : 0)};
+  background-color: ${(props) =>
+    props.$isDroppable && props.$isDragTarget
+      ? `${props.theme.colors.accent}22`
+      : "transparent"};
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 `;
 
 export const SectionHeader = styled.button`
@@ -122,6 +170,27 @@ export const NoteTitle = styled.span`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+`;
+
+export const NoteDescription = styled.span`
+  font-size: ${(props) => props.theme.fontSizes.xs};
+  color: ${(props) => props.theme.colors.mutedForeground};
+  line-height: 1.3;
+  display: block;
+`;
+
+export const NoteCategoryBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  margin-right: ${(props) => props.theme.spacing[2]};
+  background-color: ${(props) => props.theme.colors.accent};
+  color: ${(props) => props.theme.colors.accentForeground};
+  border-radius: ${(props) => props.theme.borderRadius.sm};
+  font-size: ${(props) => props.theme.fontSizes.xs};
+  font-weight: 600;
+  letter-spacing: 0.03em;
 `;
 
 export const TagsContainer = styled.div`

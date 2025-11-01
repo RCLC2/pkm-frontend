@@ -9,6 +9,14 @@ export const useUpdateNote = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["note", variables.id] });
       queryClient.invalidateQueries({ queryKey: ["notes", "recent"] });
+      queryClient.invalidateQueries({
+        queryKey: ["notes", "ids"],
+        exact: false,
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["notes", "search"],
+        exact: false,
+      });
     },
   });
 };

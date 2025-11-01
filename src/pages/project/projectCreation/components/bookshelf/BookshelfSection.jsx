@@ -14,6 +14,7 @@ export const BookshelfSection = ({
   formatDate,
   onOpenProject,
   onDeleteProject,
+  noteCounts = {},
 }) => {
   return (
     <>
@@ -24,9 +25,12 @@ export const BookshelfSection = ({
           $shelf={getPreviewStyle("shelf", bookshelfTheme.shelf)}
         >
           {projects.map((project, index) => {
-            const noteCount = Math.max(0, Number(project.noteCount) || 0);
+            const derivedCount = noteCounts[project.id];
+            const sourceCount =
+              derivedCount !== undefined ? derivedCount : project.noteCount;
+            const noteCount = Math.max(0, Number(sourceCount) || 0);
             const thickness = getBookThickness(noteCount);
-            const height = 160 + Math.min(80, noteCount * 5);
+            const height = 200;
             const template = templates.find(
               (item) => item.id === project.templateId
             );
@@ -64,11 +68,11 @@ export const BookshelfSection = ({
                     <B.BookHoverTitle>{project.title}</B.BookHoverTitle>
                     <B.BookHoverMode>{badgeLabel}</B.BookHoverMode>
                   </B.BookHoverHeader>
-                  <B.BookHoverMeta>
-                    <span>
-                      <strong>{noteCount}</strong> {DEFAULT_NOTE_COUNT_LABEL}
-                    </span>
-                    <span>Last edited {formatDate(project.updatedAt)}</span>
+                <B.BookHoverMeta>
+                  <span>
+                    <strong>{noteCount}</strong> {DEFAULT_NOTE_COUNT_LABEL}
+                  </span>
+                  <span>Last edited {formatDate(project.updatedAt)}</span>
                   </B.BookHoverMeta>
                   <B.BookHoverActions>
                     <span>Click to open</span>

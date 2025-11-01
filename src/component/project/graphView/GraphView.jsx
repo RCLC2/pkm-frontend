@@ -24,218 +24,17 @@ const TYPE_CONFIG = {
   task: { label: "Task" },
 };
 
-const GRAPH_PRESETS = {
-  zettelkasten: {
-    nodes: [
-      {
-        id: "zettel-hub",
-        title: "Knowledge Core",
-        type: "note",
-        tags: ["hub", "evergreen"],
-      },
-      {
-        id: "fleeting-stream",
-        title: "Fleeting Ideas Inbox",
-        type: "idea",
-        tags: ["capture"],
-      },
-      {
-        id: "literature-notes",
-        title: "Literature Notes",
-        type: "resource",
-        tags: ["sources", "references"],
-      },
-      {
-        id: "project-ai",
-        title: "AI Research Project",
-        type: "project",
-        tags: ["active", "lab"],
-      },
-      {
-        id: "project-writing",
-        title: "Writing Series",
-        type: "project",
-        tags: ["draft", "publishing"],
-      },
-      {
-        id: "area-learning",
-        title: "Learning Systems",
-        type: "area",
-        tags: ["growth"],
-      },
-      {
-        id: "area-creative",
-        title: "Creative Exploration",
-        type: "area",
-        tags: ["studio"],
-      },
-      {
-        id: "atomic-concepts",
-        title: "Atomic Concepts",
-        type: "concept",
-        tags: ["linking"],
-      },
-      {
-        id: "evergreen-lineages",
-        title: "Evergreen Lineages",
-        type: "note",
-        tags: ["long-term"],
-      },
-      {
-        id: "reference-archive",
-        title: "Reference Archive",
-        type: "archive",
-        tags: ["cold storage"],
-      },
-      {
-        id: "task-outbox",
-        title: "Action Items",
-        type: "task",
-        tags: ["follow-up"],
-      },
-      {
-        id: "concept-patterns",
-        title: "Patterns and Themes",
-        type: "concept",
-        tags: ["taxonomy"],
-      },
-    ],
-    edges: [
-      ["zettel-hub", "fleeting-stream"],
-      ["zettel-hub", "literature-notes"],
-      ["zettel-hub", "project-ai"],
-      ["zettel-hub", "project-writing"],
-      ["zettel-hub", "atomic-concepts"],
-      ["atomic-concepts", "evergreen-lineages"],
-      ["atomic-concepts", "concept-patterns"],
-      ["concept-patterns", "project-writing"],
-      ["concept-patterns", "area-creative"],
-      ["project-ai", "area-learning"],
-      ["project-ai", "task-outbox"],
-      ["project-writing", "task-outbox"],
-      ["project-writing", "area-creative"],
-      ["literature-notes", "project-ai"],
-      ["literature-notes", "project-writing"],
-      ["literature-notes", "reference-archive"],
-      ["reference-archive", "area-learning"],
-      ["area-learning", "evergreen-lineages"],
-      ["area-creative", "evergreen-lineages"],
-      ["area-creative", "fleeting-stream"],
-      ["fleeting-stream", "task-outbox"],
-    ],
-  },
-  "code-para": {
-    nodes: [
-      {
-        id: "para-projects",
-        title: "Active Projects",
-        type: "project",
-        tags: ["current"],
-      },
-      {
-        id: "para-areas",
-        title: "Areas of Responsibility",
-        type: "area",
-        tags: ["ongoing"],
-      },
-      {
-        id: "para-resources",
-        title: "Trusted Resources",
-        type: "resource",
-        tags: ["reference"],
-      },
-      {
-        id: "para-archives",
-        title: "Archives",
-        type: "archive",
-        tags: ["cold"],
-      },
-      {
-        id: "para-capture",
-        title: "Capture Inbox",
-        type: "idea",
-        tags: ["capture"],
-      },
-      {
-        id: "para-organize",
-        title: "Organize Board",
-        type: "concept",
-        tags: ["structure"],
-      },
-      {
-        id: "para-distill",
-        title: "Distilled Notes",
-        type: "note",
-        tags: ["evergreen"],
-      },
-      {
-        id: "para-express",
-        title: "Express Pipeline",
-        type: "project",
-        tags: ["output"],
-      },
-      {
-        id: "para-habits",
-        title: "Maintenance Rituals",
-        type: "task",
-        tags: ["weekly"],
-      },
-      {
-        id: "para-insights",
-        title: "Insight Log",
-        type: "note",
-        tags: ["learning"],
-      },
-      {
-        id: "para-frameworks",
-        title: "Framework Library",
-        type: "concept",
-        tags: ["playbook"],
-      },
-      {
-        id: "para-experiments",
-        title: "Experiments",
-        type: "project",
-        tags: ["future"],
-      },
-    ],
-    edges: [
-      ["para-capture", "para-organize"],
-      ["para-organize", "para-distill"],
-      ["para-distill", "para-express"],
-      ["para-express", "para-projects"],
-      ["para-projects", "para-areas"],
-      ["para-projects", "para-habits"],
-      ["para-areas", "para-resources"],
-      ["para-resources", "para-distill"],
-      ["para-resources", "para-archives"],
-      ["para-archives", "para-frameworks"],
-      ["para-frameworks", "para-insights"],
-      ["para-insights", "para-distill"],
-      ["para-insights", "para-experiments"],
-      ["para-experiments", "para-projects"],
-      ["para-experiments", "para-habits"],
-      ["para-habits", "para-areas"],
-      ["para-organize", "para-frameworks"],
-      ["para-capture", "para-resources"],
-      ["para-capture", "para-express"],
-      ["para-archives", "para-habits"],
-      ["para-frameworks", "para-express"],
-    ],
-  },
-};
-
 const FORCE_SETTINGS = {
-  repulsionStrength: 5200,
-  springStrength: 0.0009,
-  springLength: 160,
-  damping: 0.88,
-  attraction: 0.00065,
-  maxVelocity: 6,
+  repulsionStrength: 16000,
+  springStrength: 0.08,
+  springLength: 120,
+  damping: 0.12,
+  attraction: 0.0025,
+  maxVelocity: 24,
 };
 
-const MIN_SCALE = 0.35;
-const MAX_SCALE = 3;
+const MIN_SCALE = 0.45;
+const MAX_SCALE = 2.4;
 
 function normalizeEdge(a, b) {
   return a < b ? [a, b] : [b, a];
@@ -276,30 +75,6 @@ function composeGraph(rawNodes, rawEdges) {
   });
 
   return { nodes, edges, nodeMap, adjacency };
-}
-
-function buildPresetGraph(methodology) {
-  const preset = GRAPH_PRESETS[methodology] ?? GRAPH_PRESETS.zettelkasten;
-  const total = preset.nodes.length || 1;
-  const nodes = preset.nodes.map((node, index) => {
-    const angle = (index / total) * Math.PI * 2;
-    const baseRadius = 240 + (node.type === "area" ? 60 : 0);
-    const jitter = (Math.random() - 0.5) * 90;
-    return {
-      ...node,
-      x: Math.cos(angle) * baseRadius + jitter,
-      y: Math.sin(angle) * baseRadius + jitter,
-      vx: 0,
-      vy: 0,
-      degree: 0,
-      seed: Math.random() * Math.PI * 2,
-    };
-  });
-  const edges = preset.edges.map(([from, to]) => {
-    const [normalizedFrom, normalizedTo] = normalizeEdge(from, to);
-    return { from: normalizedFrom, to: normalizedTo };
-  });
-  return composeGraph(nodes, edges);
 }
 
 function convertApiGraph(apiNodes = [], apiEdges = []) {
@@ -775,18 +550,29 @@ function GraphViewInner({
       renderGraph();
     };
 
-    const presetGraph = buildPresetGraph(methodology);
-    applyGraph(presetGraph);
+    applyGraph(composeGraph([], []), { refit: false });
 
     const convertAndApplyApiGraph = (payload) => {
-      const apiGraph = convertApiGraph(payload?.nodes, payload?.edges);
-      if (apiGraph) {
-        applyGraph(apiGraph);
-      } else {
-        updateViewToFit();
-        energizeNodes(0.3);
-        renderGraph();
+      if (!payload) {
+        applyGraph(composeGraph([], []));
+        return;
       }
+
+      const nodes = Array.isArray(payload.nodes) ? payload.nodes : [];
+      const edges = Array.isArray(payload.edges) ? payload.edges : [];
+
+      if (nodes.length === 0) {
+        applyGraph(composeGraph([], []));
+        return;
+      }
+
+      const apiGraph = convertApiGraph(nodes, edges);
+      if (!apiGraph) {
+        applyGraph(composeGraph([], []));
+        return;
+      }
+
+      applyGraph(apiGraph);
     };
 
     const loadGraphFromApi = async () => {
@@ -796,14 +582,13 @@ function GraphViewInner({
           methodology,
         });
         if (!cancelled) {
+          console.log("[GraphView] fetched graph payload", payload);
           convertAndApplyApiGraph(payload);
         }
       } catch (error) {
         console.error("Failed to fetch graph data", error);
         if (!cancelled) {
-          updateViewToFit();
-          energizeNodes(0.2);
-          renderGraph();
+          applyGraph(composeGraph([], []));
         }
       }
     };

@@ -8,6 +8,11 @@ export const useCreateNote = () => {
     mutationFn: createNote,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes", "recent"] });
+      queryClient.invalidateQueries({ queryKey: ["notes", "ids"], exact: false });
+      queryClient.invalidateQueries({
+        queryKey: ["notes", "search"],
+        exact: false,
+      });
     },
   });
 };

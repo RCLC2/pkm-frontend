@@ -21,6 +21,7 @@ import { BookshelfSection } from "./components/bookshelf/BookshelfSection";
 import { CustomizationPanel } from "./components/customization/CustomizationPanel";
 import { useCreateWorkspace } from "../../../hooks/workspace/useCreateWorkspace.jsx";
 import { useDeleteWorkspace } from "../../../hooks/workspace/useDeleteWorkspace.jsx";
+import { useWorkspaceNoteCounts } from "./hooks/useWorkspaceNoteCounts";
 
 const wizardSteps = [
   {
@@ -73,6 +74,7 @@ export function ProjectCreation({
 
   const { mutate: createWorkspace } = useCreateWorkspace();
   const { mutate: deleteWorkspace } = useDeleteWorkspace();
+  const { data: noteCounts = {} } = useWorkspaceNoteCounts(savedProjects);
 
   const {
     points,
@@ -166,17 +168,17 @@ export function ProjectCreation({
       : "";
 
   const getBookThickness = (noteCount) => {
-    const MIN_THICKNESS = 48;
-    const MAX_THICKNESS = 108;
-    const SCALE_MAX_NOTES = 150;
+    const MIN_THICKNESS = 56;
+    const MAX_THICKNESS = 196;
+    const SCALE_MAX_NOTES = 160;
 
     if (!Number.isFinite(noteCount) || noteCount <= 0) {
       return MIN_THICKNESS;
     }
 
     const clampedCount = Math.min(noteCount, SCALE_MAX_NOTES);
-    const ratio = clampedCount / SCALE_MAX_NOTES;
-    const thickness = MIN_THICKNESS + ratio * (MAX_THICKNESS - MIN_THICKNESS);
+    const easedRatio = Math.pow(clampedCount / SCALE_MAX_NOTES, 0.85);
+    const thickness = MIN_THICKNESS + easedRatio * (MAX_THICKNESS - MIN_THICKNESS);
 
     return Math.round(thickness);
   };
@@ -335,6 +337,7 @@ export function ProjectCreation({
                     formatDate={formatDate}
                     onOpenProject={onOpenProject}
                     onDeleteProject={handleDeleteProject}
+                    noteCounts={noteCounts}
                   />
 
                   <CustomizationPanel

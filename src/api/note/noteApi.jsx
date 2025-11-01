@@ -29,8 +29,25 @@ export const deleteNote = async (id) => {
 
 // 노트 검색으로 조회
 // params: { workspaceId, keyword, page, size, sort, direction }
-export const searchNotesByKeword = async (params) => {
-  const res = await noteApi.get(`/note/search`, { params });
+export const searchNotesByKeword = async ({
+  workspaceId,
+  keyword,
+  page = 0,
+  size = 20,
+  sort = "updatedAt",
+  direction = "DESC",
+} = {}) => {
+  const queryParams = {
+    workspaceId,
+    keyword,
+    page,
+    size,
+    sort,
+    direction,
+  };
+
+  const res = await noteApi.get(`/note/search`, { params: queryParams });
+  // console.log(res);
   return res.data.data;
 };
 
@@ -44,6 +61,7 @@ export const getRecentNotes = async (params) => {
 // workspaceId 기반 조회
 export const getNotesByIds = async (params) => {
   const res = await noteApi.get(`/note/ids`, { params });
+  console.log(res);
   return res.data.data;
 };
 
@@ -52,4 +70,3 @@ export const updateParaMapping = async (data) => {
   const res = await noteApi.post(`/note/para-mapping`, data);
   return res.data.data;
 };
-
