@@ -10,8 +10,20 @@ import {
   DEMO_GRAPH_PROJECT_ID,
 } from "../../../mocks/hooks/project/graphNetwork";
 
-const graphService = mockGraphApi;
 const FALLBACK_PROJECT_ID = DEMO_GRAPH_PROJECT_ID;
+
+const getStoredWorkspaceId = () => {
+  if (typeof window === "undefined") return null;
+  try {
+    const stored = window.localStorage.getItem("current_workspace");
+    if (!stored) return null;
+    const parsed = JSON.parse(stored);
+    return parsed?.id ?? null;
+  } catch (error) {
+    console.warn("[GraphView] failed to parse current_workspace", error);
+    return null;
+  }
+};
 
 const TYPE_CONFIG = {
   note: { label: "Permanent Note" },
@@ -59,7 +71,11 @@ function composeGraph(rawNodes, rawEdges) {
     const from = edge.from;
     const to = edge.to;
     const [normalizedFrom, normalizedTo] = normalizeEdge(from, to);
-    return { from: normalizedFrom, to: normalizedTo };
+    return {
+      from: normalizedFrom,
+      to: normalizedTo,
+      status: edge.status ?? "edited",
+    };
   });
 
   const nodeMap = new Map(nodes.map((node) => [node.id, node]));
@@ -77,6 +93,8 @@ function composeGraph(rawNodes, rawEdges) {
   return { nodes, edges, nodeMap, adjacency };
 }
 
+const graphService = mockGraphApi;
+
 function convertApiGraph(apiNodes = [], apiEdges = []) {
   if (!apiNodes.length) return null;
   const total = apiNodes.length || 1;
@@ -87,7 +105,7 @@ function convertApiGraph(apiNodes = [], apiEdges = []) {
     return {
       id: node.id,
       title: node.title,
-      type: node.type ?? "note",
+      type: (node.type || "note").toLowerCase(),
       tags: node.tags ?? [],
       x: Math.cos(angle) * baseRadius + jitter,
       y: Math.sin(angle) * baseRadius + jitter,
@@ -102,7 +120,11 @@ function convertApiGraph(apiNodes = [], apiEdges = []) {
     const from = edge.sourceId ?? edge.from;
     const to = edge.targetId ?? edge.to;
     const [normalizedFrom, normalizedTo] = normalizeEdge(from, to);
-    return { from: normalizedFrom, to: normalizedTo };
+    return {
+      from: normalizedFrom,
+      to: normalizedTo,
+      status: edge.status ?? "edited",
+    };
   });
 
   return composeGraph(nodes, edges);
@@ -250,7 +272,8 @@ function drawGraph(ctx, canvas, graph, view, highlight) {
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
 
-  edges.forEach(({ from, to }) => {
+  edges.forEach((edge) => {
+    const { from, to } = edge;
     const source = graph.nodeMap.get(from);
     const target = graph.nodeMap.get(to);
     if (!source || !target) return;
@@ -267,9 +290,19 @@ function drawGraph(ctx, canvas, graph, view, highlight) {
           hoveredNeighbors?.has(from) ||
           hoveredNeighbors?.has(to)));
 
-    ctx.strokeStyle = edgeHighlighted
-      ? "rgba(226, 232, 240, 0.7)"
-      : "rgba(148, 163, 184, 0.18)";
+    const status = String(edge.status || "").toLowerCase();
+    const isConfirmed = status === "confirmed";
+    const isPending = status === "pending";
+
+    if (edgeHighlighted) {
+      ctx.strokeStyle = "rgba(226, 232, 240, 0.7)";
+    } else if (isConfirmed) {
+      ctx.strokeStyle = "rgba(94, 234, 212, 0.45)";
+    } else if (isPending) {
+      ctx.strokeStyle = "rgba(250, 204, 21, 0.35)";
+    } else {
+      ctx.strokeStyle = "rgba(148, 163, 184, 0.18)";
+    }
     ctx.lineWidth = edgeHighlighted ? 2.2 : 1;
 
     ctx.beginPath();
@@ -378,6 +411,8 @@ function GraphViewInner({
   onNavigateToNote,
   projectId,
 }) {
+  const storedProjectId = getStoredWorkspaceId();
+  const initialProjectId = projectId || storedProjectId || FALLBACK_PROJECT_ID;
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
   const ctxRef = useRef(null);
@@ -403,7 +438,7 @@ function GraphViewInner({
     selectedNodeId: null,
   });
   const highlightRef = useRef({ selectedId: null, hoveredId: null });
-  const projectIdRef = useRef(projectId || FALLBACK_PROJECT_ID);
+  const projectIdRef = useRef(initialProjectId);
   const selectionRef = useRef(null);
   const linkSourceRef = useRef(null);
   const tooltipRef = useRef(null);
@@ -431,8 +466,8 @@ function GraphViewInner({
   }, [tooltip]);
 
   useEffect(() => {
-    projectIdRef.current = projectId || FALLBACK_PROJECT_ID;
-  }, [projectId]);
+    projectIdRef.current = projectId || storedProjectId || FALLBACK_PROJECT_ID;
+  }, [projectId, storedProjectId]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -526,6 +561,7 @@ function GraphViewInner({
     };
 
     const applyGraph = (graph, { refit = true } = {}) => {
+      console.log("[GraphView] applying graph", graph);
       graphRef.current = graph;
       highlightRef.current.selectedId = null;
       highlightRef.current.hoveredId = null;
@@ -550,18 +586,11 @@ function GraphViewInner({
       renderGraph();
     };
 
-    applyGraph(composeGraph([], []), { refit: false });
-
     const convertAndApplyApiGraph = (payload) => {
-      if (!payload) {
-        applyGraph(composeGraph([], []));
-        return;
-      }
+      const nodes = Array.isArray(payload?.nodes) ? payload.nodes : [];
+      const edges = Array.isArray(payload?.edges) ? payload.edges : [];
 
-      const nodes = Array.isArray(payload.nodes) ? payload.nodes : [];
-      const edges = Array.isArray(payload.edges) ? payload.edges : [];
-
-      if (nodes.length === 0) {
+      if (!nodes.length) {
         applyGraph(composeGraph([], []));
         return;
       }
@@ -576,11 +605,17 @@ function GraphViewInner({
     };
 
     const loadGraphFromApi = async () => {
+      if (!projectIdRef.current) {
+        convertAndApplyApiGraph({ nodes: [], edges: [] });
+        return;
+      }
+
       try {
         const payload = await graphService.fetchGraph({
           projectId: projectIdRef.current,
           methodology,
         });
+
         if (!cancelled) {
           console.log("[GraphView] fetched graph payload", payload);
           convertAndApplyApiGraph(payload);

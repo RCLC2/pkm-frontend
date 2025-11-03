@@ -1,9 +1,50 @@
 import { mockSavedProjects } from "./savedProjects";
-import { getRecentNotes } from "../../../api/note/noteApi";
-import { getWorkspaceGraph } from "../../../api/graph/workspaceGraphApi";
+import { getNotesByIds, getNoteById } from "../../../api/note/noteApi";
 
 const EDGE_STORAGE_KEY = "knowledgebase-graph-edges";
 const DEMO_PROJECT_ID = mockSavedProjects[0]?.id ?? "project-graph-demo";
+
+const FALLBACK_GRAPH = {
+  nodes: [
+    {
+      id: "mock-page-1",
+      title: "Welcome Guide",
+      type: "note",
+      tags: ["intro", "start"],
+    },
+    {
+      id: "mock-page-2",
+      title: "Project Overview",
+      type: "project",
+      tags: ["summary"],
+    },
+    {
+      id: "mock-page-3",
+      title: "Key Concepts",
+      type: "concept",
+      tags: ["reference"],
+    },
+    {
+      id: "mock-page-4",
+      title: "Active Notes",
+      type: "idea",
+      tags: ["work"],
+    },
+    {
+      id: "mock-page-5",
+      title: "Archive",
+      type: "archive",
+      tags: ["history"],
+    },
+  ],
+  edges: [
+    { sourceId: "mock-page-1", targetId: "mock-page-2", status: "confirmed" },
+    { sourceId: "mock-page-2", targetId: "mock-page-3", status: "edited" },
+    { sourceId: "mock-page-3", targetId: "mock-page-4", status: "pending" },
+    { sourceId: "mock-page-4", targetId: "mock-page-5", status: "edited" },
+    { sourceId: "mock-page-1", targetId: "mock-page-4", status: "edited" },
+  ],
+};
 
 const readEdgeStore = () => {
   if (typeof window === "undefined") return {};
@@ -59,47 +100,18 @@ const dedupeEdges = (edges, validIds = null) => {
     }
 
     seen.add(key);
-    acc.push({ sourceId, targetId });
+    acc.push({ sourceId, targetId, status: edge.status || "edited" });
     return acc;
   }, []);
 };
 
-const GRAPH_PRESETS = {
-  zettelkasten: {
-    nodes: [
-      { id: "preset-zettel-1", title: "Knowledge Core", type: "note", tags: ["hub"] },
-      { id: "preset-zettel-2", title: "Fleeting Ideas", type: "idea", tags: ["capture"] },
-      { id: "preset-zettel-3", title: "Literature Notes", type: "resource", tags: ["reference"] },
-      { id: "preset-zettel-4", title: "Research Project", type: "project", tags: ["active"] },
-    ],
-    edges: [
-      { sourceId: "preset-zettel-1", targetId: "preset-zettel-2" },
-      { sourceId: "preset-zettel-1", targetId: "preset-zettel-3" },
-      { sourceId: "preset-zettel-3", targetId: "preset-zettel-4" },
-    ],
-  },
-  "code-para": {
-    nodes: [
-      { id: "preset-para-1", title: "Projects", type: "project", tags: ["current"] },
-      { id: "preset-para-2", title: "Areas", type: "area", tags: ["ongoing"] },
-      { id: "preset-para-3", title: "Resources", type: "resource", tags: ["library"] },
-      { id: "preset-para-4", title: "Archive", type: "archive", tags: ["history"] },
-    ],
-    edges: [
-      { sourceId: "preset-para-1", targetId: "preset-para-2" },
-      { sourceId: "preset-para-2", targetId: "preset-para-3" },
-      { sourceId: "preset-para-3", targetId: "preset-para-4" },
-    ],
-  },
-};
-
-const determineParaType = (note) => {
-  const category = note.paraCategory
-    ? String(note.paraCategory).toLowerCase()
+const determineParaType = (node) => {
+  const category = node.paraCategory
+    ? String(node.paraCategory).toLowerCase()
     : "";
   if (category) return category;
 
-  const id = String(note.id || "").toLowerCase();
+  const id = String(node.id || "").toLowerCase();
   if (id.includes("project")) return "project";
   if (id.includes("area")) return "area";
   if (id.includes("resource")) return "resource";
@@ -111,12 +123,12 @@ const determineParaType = (note) => {
   return "note";
 };
 
-const determineNodeType = (note, methodology) => {
+const determineNodeType = (node, methodology) => {
   if (methodology === "code-para" || methodology === "para") {
-    return determineParaType(note);
+    return determineParaType(node);
   }
 
-  const tags = (note.tags || []).map((tag) => String(tag).toLowerCase());
+  const tags = (node.tags || []).map((tag) => String(tag).toLowerCase());
   if (tags.some((tag) => tag.includes("idea"))) return "idea";
   if (tags.some((tag) => tag.includes("project"))) return "project";
   if (tags.some((tag) => tag.includes("resource") || tag.includes("reference"))) {
@@ -126,106 +138,250 @@ const determineNodeType = (note, methodology) => {
   return "note";
 };
 
-const toTimestamp = (note) => {
-  const value =
-    note.updatedAt || note.lastModified || note.createdAt || note.created_at;
-  const time = value ? Date.parse(value) : NaN;
-  return Number.isFinite(time) ? time : 0;
-};
-
-const buildSequentialEdges = (notes) => {
-  if (notes.length < 2) return [];
-  const sorted = [...notes].sort((a, b) => toTimestamp(a) - toTimestamp(b));
-  const edges = [];
-  for (let index = 1; index < sorted.length; index += 1) {
-    const prev = sorted[index - 1];
-    const current = sorted[index];
-    edges.push({ sourceId: prev.id, targetId: current.id });
-  }
-  return edges;
-};
-
-const buildTagEdges = (notes) => {
-  const tagMap = new Map();
-  notes.forEach((note) => {
-    (note.tags || []).forEach((rawTag) => {
-      const tag = String(rawTag).toLowerCase();
-      if (!tagMap.has(tag)) {
-        tagMap.set(tag, []);
-      }
-      tagMap.get(tag).push(note.id);
-    });
-  });
-
-  const edges = [];
-  tagMap.forEach((ids) => {
-    if (ids.length < 2) return;
-    const anchor = ids[0];
-    for (let index = 1; index < ids.length; index += 1) {
-      edges.push({ sourceId: anchor, targetId: ids[index] });
-    }
-  });
-
-  return edges;
-};
-
 const normalizeApiNode = (node, methodology) => {
-  if (!node) return null;
-  const id = node.id ?? node.noteId ?? node.nodeId;
+  if (!node || typeof node !== "object") return null;
+  const id =
+    node.id ??
+    node.noteId ??
+    node.pageId ??
+    node.nodeId ??
+    node.documentId ??
+    node.cardId ??
+    node.contentId;
   if (!id) return null;
+
+  const rawType =
+    node.type ??
+    node.noteType ??
+    node.pageType ??
+    node.paraCategory ??
+    node.category;
+
+  const title =
+    node.title ??
+    node.name ??
+    node.pageTitle ??
+    node.noteTitle ??
+    node.heading ??
+    `Untitled ${id}`;
+
+  const tagsSource =
+    node.tags ??
+    node.pageTags ??
+    node.noteTags ??
+    node.labels ??
+    [];
+
+  const filename =
+    node.filename ??
+    node.fileName ??
+    node.slug ??
+    node.path ??
+    null;
+
   return {
-    id,
-    title: node.title || node.name || "Untitled Note",
-    type: node.type || determineNodeType(node, methodology),
-    tags: node.tags || [],
+    id: String(id),
+    title,
+    type: rawType
+      ? String(rawType).toLowerCase()
+      : determineNodeType(node, methodology),
+    tags: Array.isArray(tagsSource) ? tagsSource : [],
+    filename,
   };
 };
 
 const normalizeApiEdge = (edge) => {
-  if (!edge) return null;
-  const sourceId = edge.sourceId ?? edge.from ?? edge.source ?? edge.start;
-  const targetId = edge.targetId ?? edge.to ?? edge.target ?? edge.end;
+  if (!edge || typeof edge !== "object") return null;
+  const sourceId =
+    edge.sourceId ??
+    edge.from ??
+    edge.source ??
+    edge.start ??
+    edge.sourceNoteId ??
+    edge.sourcePageId ??
+    edge.parentId ??
+    edge.originId;
+  const targetId =
+    edge.targetId ??
+    edge.to ??
+    edge.target ??
+    edge.end ??
+    edge.targetNoteId ??
+    edge.targetPageId ??
+    edge.childId ??
+    edge.destinationId;
   if (!sourceId || !targetId) return null;
-  return { sourceId, targetId };
-};
 
-const buildGraphFromNotes = async (projectId, methodology) => {
-  try {
-    const notes = await getRecentNotes({ workspaceId: projectId, size: 120 });
-    if (!Array.isArray(notes) || notes.length === 0) {
-      return null;
-    }
-
-    const nodes = notes.map((note) => ({
-      id: note.id,
-      title: note.title || "Untitled Note",
-      type: determineNodeType(note, methodology),
-      tags: note.tags || [],
-    }));
-
-    const sequentialEdges = buildSequentialEdges(notes);
-    const tagEdges = buildTagEdges(notes);
-    const idSet = new Set(nodes.map((node) => String(node.id)));
-    const generatedEdges = dedupeEdges([...sequentialEdges, ...tagEdges], idSet);
-
-    return { nodes, edges: generatedEdges };
-  } catch (error) {
-    console.warn("[graphNetwork] recent notes fetch 실패", error);
-    return null;
-  }
-};
-
-const buildPresetGraph = (methodology) => {
-  const preset = GRAPH_PRESETS[methodology] ?? GRAPH_PRESETS.zettelkasten;
   return {
-    nodes: preset.nodes,
-    edges: preset.edges,
+    sourceId: String(sourceId),
+    targetId: String(targetId),
+    status: String(edge.status || "edited").toLowerCase(),
   };
 };
 
-const mergeEdges = (existing = [], generated = [], validIds = null) => {
-  const merged = [...(existing || []), ...(generated || [])];
+const GRAPH_NODE_KEYS = [
+  "nodes",
+  "pages",
+  "notes",
+  "items",
+  "documents",
+  "pageResponses",
+  "pageNodes",
+];
+
+const GRAPH_EDGE_KEYS = [
+  "edges",
+  "links",
+  "connections",
+  "relations",
+  "relationships",
+  "linkResponses",
+  "pageLinks",
+];
+
+const takeFirstArray = (source, keys) => {
+  for (const key of keys) {
+    const value = source?.[key];
+    if (Array.isArray(value) && value.length > 0) {
+      return value;
+    }
+  }
+  return [];
+};
+
+const collectGraphSources = (root) => {
+  const sources = [];
+  const stack = [root];
+  const visited = new Set();
+
+  while (stack.length) {
+    const current = stack.pop();
+    if (!current || typeof current !== "object") continue;
+    if (visited.has(current)) continue;
+    visited.add(current);
+
+    sources.push(current);
+
+    Object.values(current).forEach((value) => {
+      if (value && typeof value === "object" && !Array.isArray(value)) {
+        stack.push(value);
+      }
+    });
+  }
+
+  return sources;
+};
+
+const normalizeGraphPayload = (payload, methodology) => {
+  if (!payload || typeof payload !== "object") {
+    return { nodes: [], edges: [] };
+  }
+
+  const graphRoot = payload.data && typeof payload.data === "object"
+    ? payload.data
+    : payload;
+
+  const graphData = graphRoot.graph && typeof graphRoot.graph === "object"
+    ? graphRoot.graph
+    : graphRoot;
+
+  const nestedData = graphData.data && typeof graphData.data === "object"
+    ? graphData.data
+    : null;
+
+  let rawNodes = Array.isArray(graphData.nodes) ? graphData.nodes : [];
+  if (!rawNodes.length) {
+    rawNodes = takeFirstArray(graphData, GRAPH_NODE_KEYS);
+  }
+  if (!rawNodes.length && nestedData) {
+    rawNodes = takeFirstArray(nestedData, GRAPH_NODE_KEYS);
+  }
+  if (!rawNodes.length) {
+    const sources = collectGraphSources(graphData);
+    for (const source of sources) {
+      rawNodes = takeFirstArray(source, GRAPH_NODE_KEYS);
+      if (rawNodes.length) break;
+    }
+  }
+
+  let rawEdges = Array.isArray(graphData.edges) ? graphData.edges : [];
+  if (!rawEdges.length) {
+    rawEdges = takeFirstArray(graphData, GRAPH_EDGE_KEYS);
+  }
+  if (!rawEdges.length && nestedData) {
+    rawEdges = takeFirstArray(nestedData, GRAPH_EDGE_KEYS);
+  }
+  if (!rawEdges.length) {
+    const sources = collectGraphSources(graphData);
+    for (const source of sources) {
+      rawEdges = takeFirstArray(source, GRAPH_EDGE_KEYS);
+      if (rawEdges.length) break;
+    }
+  }
+
+  const nodes = rawNodes
+    .map((node) => normalizeApiNode(node, methodology))
+    .filter(Boolean);
+
+  const validIds = new Set(nodes.map((node) => node.id));
+  const edges = dedupeEdges(
+    rawEdges.map((edge) => normalizeApiEdge(edge)).filter(Boolean),
+    validIds
+  );
+
+  return { nodes, edges };
+};
+
+const mergeEdges = (existing = [], incoming = [], validIds) => {
+  const dedupedExisting = dedupeEdges(existing, validIds);
+  const merged = [...dedupedExisting, ...incoming];
   return dedupeEdges(merged, validIds);
+};
+
+const fetchWorkspaceNotes = async (workspaceId) => {
+  try {
+    const noteIds = await getNotesByIds({ workspaceId });
+    console.log("[graphNetwork] note ids for workspace", workspaceId, noteIds);
+
+    if (!Array.isArray(noteIds) || noteIds.length === 0) {
+      return [];
+    }
+
+    const seen = new Set();
+    const normalizedIds = [];
+
+    noteIds.forEach((candidate) => {
+      const rawId =
+        candidate && typeof candidate === "object" && "id" in candidate
+          ? candidate.id
+          : candidate;
+      if (!rawId) return;
+      const key = String(rawId);
+      if (seen.has(key)) return;
+      seen.add(key);
+      normalizedIds.push(rawId);
+    });
+
+    const limitedIds = normalizedIds.slice(0, 200);
+    console.log("[graphNetwork] normalized note id list", limitedIds);
+
+    const notes = await Promise.all(
+      limitedIds.map(async (noteId) => {
+        try {
+          const note = await getNoteById(noteId);
+          return note;
+        } catch (error) {
+          console.warn("[graphNetwork] failed to fetch note", noteId, error);
+          return null;
+        }
+      })
+    );
+
+    return notes.filter(Boolean);
+  } catch (error) {
+    console.error("[graphNetwork] failed to fetch workspace notes", error);
+    return [];
+  }
 };
 
 export const mockGraphApi = {
@@ -237,35 +393,33 @@ export const mockGraphApi = {
     }
 
     try {
-      const apiGraph = await getWorkspaceGraph(projectId);
-      console.log("[graphNetwork] workspace graph api response", apiGraph);
+      const notes = await fetchWorkspaceNotes(projectId);
+      console.log("[graphNetwork] fetched workspace notes", notes);
 
-      const nodes = Array.isArray(apiGraph?.nodes)
-        ? apiGraph.nodes
-            .map((node) => normalizeApiNode(node, methodology))
-            .filter(Boolean)
-        : [];
+      const normalizedResponse = normalizeGraphPayload({ nodes: notes, edges: [] }, methodology);
+      console.log("[graphNetwork] normalized graph nodes", normalizedResponse.nodes);
+      console.log("[graphNetwork] normalized graph edges", normalizedResponse.edges);
+      const withFallback = normalizedResponse.nodes.length
+        ? normalizedResponse
+        : FALLBACK_GRAPH;
 
-      const edgesFromApi = Array.isArray(apiGraph?.edges)
-        ? dedupeEdges(apiGraph.edges.map(normalizeApiEdge).filter(Boolean))
-        : [];
-
-      if (!nodes.length) {
-        return { projectId, nodes: [], edges: [] };
-      }
-
-      const validIds = new Set(nodes.map((node) => String(node.id)));
+      const validIds = new Set(withFallback.nodes.map((node) => node.id));
       const storedEdges = Array.isArray(store[projectId]) ? store[projectId] : [];
-      const mergedEdges = mergeEdges(storedEdges, edgesFromApi, validIds);
+      const mergedEdges = mergeEdges(storedEdges, withFallback.edges, validIds);
 
       if (mergedEdges.length !== storedEdges.length) {
         store[projectId] = mergedEdges;
         writeEdgeStore(store);
       }
 
-      const response = { projectId, nodes, edges: mergedEdges };
-      console.log("[graphNetwork] normalized graph response", response);
-      return response;
+      const result = {
+        projectId,
+        nodes: withFallback.nodes,
+        edges: mergedEdges,
+      };
+
+      console.log("[graphNetwork] normalized graph response", result);
+      return result;
     } catch (error) {
       console.error("[graphNetwork] workspace graph api error", error);
       return { projectId, nodes: [], edges: [] };
@@ -275,7 +429,7 @@ export const mockGraphApi = {
   async createBacklink({ projectId = DEMO_PROJECT_ID, sourceId, targetId }) {
     const store = readEdgeStore();
     const current = Array.isArray(store[projectId]) ? store[projectId] : [];
-    const edges = dedupeEdges([...current, { sourceId, targetId }], null);
+    const edges = dedupeEdges([...current, { sourceId, targetId, status: "edited" }], null);
     store[projectId] = edges;
     writeEdgeStore(store);
 
